@@ -1,0 +1,71 @@
+{
+  "profile": "aggressive",
+  "initial_investment": 10000.0,
+  "currency": "USD",
+  "allocation": {
+    "stocks": 0.85,
+    "bonds": 0.15,
+    "cash": 0.0
+  },
+  "metrics": {
+    "annualized_return": 0.115,
+    "annualized_volatility": 0.19,
+    "max_drawdown": -0.32
+  },
+  "performance": [
+    {
+      "date": "2023-01-01",
+      "value": 10000.0
+    },
+    {
+      "date": "2023-03-28",
+      "value": 10377.47
+    },
+    {
+      "date": "2023-06-28",
+      "value": 11908.17
+    },
+    {
+      "date": "2023-09-28",
+      "value": 11196.89
+    },
+    {
+      "date": "2023-12-28",
+      "value": 12574.39
+    },
+    {
+      "date": "2024-03-28",
+      "value": 12626.33
+    },
+    {
+      "date": "2024-06-28",
+      "value": 12675.65
+    },
+    {
+      "date": "2024-09-28",
+      "value": 15327.7
+    },
+    {
+      "date": "2024-12-28",
+      "value": 15997.77
+    },
+    {
+      "date": "2025-03-28",
+      "value": 16392.47
+    },
+    {
+      "date": "2025-06-28",
+      "value": 17999.79
+    },
+    {
+      "date": "2025-09-28",
+      "value": 20444.18
+    },
+    {
+      "date": "2025-12-28",
+      "value": 20972.05
+    }
+  ],
+  "data_source": "fixture",
+  "is_simulated": true
+}

@@ -1,0 +1,14 @@
+{
+  "risk_profile": "moderate",
+  "portfolio_value": 10000,
+  "allocation": {
+    "stocks": 0.60,
+    "bonds": 0.35,
+    "cash": 0.05
+  },
+  "annual_return": 0.072,
+  "annual_volatility": 0.118,
+  "max_drawdown": -0.214,
+  "time_horizon_years": 10,
+  "is_simulated": true
+}

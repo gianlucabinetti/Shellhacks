@@ -1,0 +1,116 @@
+[
+  {
+    "symbol": "BTC/USD",
+    "name": "Bitcoin",
+    "asset_class": "crypto",
+    "category": "Digital currency"
+  },
+  {
+    "symbol": "ETH/USD",
+    "name": "Ethereum",
+    "asset_class": "crypto",
+    "category": "Smart-contract platform"
+  },
+  {
+    "symbol": "SOL/USD",
+    "name": "Solana",
+    "asset_class": "crypto",
+    "category": "Smart-contract platform"
+  },
+  {
+    "symbol": "AVAX/USD",
+    "name": "Avalanche",
+    "asset_class": "crypto",
+    "category": "Smart-contract platform"
+  },
+  {
+    "symbol": "LINK/USD",
+    "name": "Chainlink",
+    "asset_class": "crypto",
+    "category": "Oracle network"
+  },
+  {
+    "symbol": "DOGE/USD",
+    "name": "Dogecoin",
+    "asset_class": "crypto",
+    "category": "Meme-origin currency"
+  },
+  {
+    "symbol": "LTC/USD",
+    "name": "Litecoin",
+    "asset_class": "crypto",
+    "category": "Digital currency"
+  },
+  {
+    "symbol": "BCH/USD",
+    "name": "Bitcoin Cash",
+    "asset_class": "crypto",
+    "category": "Digital currency"
+  },
+  {
+    "symbol": "UNI/USD",
+    "name": "Uniswap",
+    "asset_class": "crypto",
+    "category": "DeFi governance token"
+  },
+  {
+    "symbol": "AAVE/USD",
+    "name": "Aave",
+    "asset_class": "crypto",
+    "category": "DeFi governance token"
+  },
+  {
+    "symbol": "DOT/USD",
+    "name": "Polkadot",
+    "asset_class": "crypto",
+    "category": "Interoperability network"
+  },
+  {
+    "symbol": "XRP/USD",
+    "name": "XRP",
+    "asset_class": "crypto",
+    "category": "Payments network"
+  },
+  {
+    "symbol": "VTI",
+    "name": "Vanguard Total Stock Market ETF",
+    "asset_class": "stock",
+    "category": "US equity ETF"
+  },
+  {
+    "symbol": "VXUS",
+    "name": "Vanguard Total International Stock ETF",
+    "asset_class": "stock",
+    "category": "International equity ETF"
+  },
+  {
+    "symbol": "SPY",
+    "name": "SPDR S&P 500 ETF",
+    "asset_class": "stock",
+    "category": "US equity ETF"
+  },
+  {
+    "symbol": "AAPL",
+    "name": "Apple",
+    "asset_class": "stock",
+    "category": "Individual stock"
+  },
+  {
+    "symbol": "MSFT",
+    "name": "Microsoft",
+    "asset_class": "stock",
+    "category": "Individual stock"
+  },
+  {
+    "symbol": "BND",
+    "name": "Vanguard Total Bond Market ETF",
+    "asset_class": "bond",
+    "category": "Bond ETF"
+  },
+  {
+    "symbol": "SGOV",
+    "name": "iShares 0-3 Month Treasury Bond ETF",
+    "asset_class": "bond",
+    "category": "Treasury ETF"
+  }
+]
