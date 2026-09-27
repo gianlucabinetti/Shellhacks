@@ -23,6 +23,24 @@ No personal bank account, brokerage portfolio, or crypto wallet is connected.
   The UI clearly distinguishes AWS output from an offline template.
 - **Expandable catalog:** add provider-supported symbols in
   `backend/market_assets.json`; no frontend code changes are needed.
+- **Benchmark comparison:** overlay the S&P 500 (SPY), a 60/40 VTI/BND mix, or
+  Bitcoin, compared over the same dates.
+- **Diversification X-ray:** correlation heatmap plus a 0–100 score based on
+  the diversification ratio ("how many independent bets is this really?").
+- **AI portfolio copilot:** a chat grounded in the calculated numbers. On
+  Bedrock it can run what-if mixes through a tool that recalculates them with
+  real prices; "Load this mix" applies one to the dashboard. With
+  `AI_PROVIDER=fallback` it answers common questions deterministically.
+
+New endpoints (new contracts; existing ones are unchanged):
+
+| Endpoint | Body | Returns |
+|---|---|---|
+| `POST /api/market/insights` | `{portfolio: MarketRequest, benchmark: "SPY" \| "60_40" \| "BTC" \| null}` | correlation matrix, diversification, contributions, benchmark series |
+| `POST /api/market/chat` | `{portfolio, benchmark, messages: [{role, content}]}` (last message from the user) | `{source, reply, what_ifs, suggestions}` |
+
+Calculations live in `backend/analytics/insights.py`; prompts and the chat
+tool loop live in `backend/ai/chat.py`.
 
 The new market screen is the default landing page and calls the backend.
 The earlier questionnaire and dashboard remain under **Original demo**, with

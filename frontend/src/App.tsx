@@ -34,6 +34,7 @@ export default function App() {
       onStartAssessment={() => go({ name: 'quiz' })}
       marketsActive={step.name === 'markets'}
       landingActive={step.name === 'welcome'}
+      wide={step.name === 'markets'}
     >
       {step.name === 'markets' && <MarketPage />}
       {step.name === 'welcome' && (

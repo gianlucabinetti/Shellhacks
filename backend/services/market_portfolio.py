@@ -5,18 +5,27 @@ import math
 import statistics
 from datetime import timedelta
 
-from backend.models.market import MarketPortfolio, MarketRequest
+from backend.models.market import MarketAsset, MarketPortfolio, MarketRequest
 from backend.services.market_data import MarketDataError, assets, get_history
 
 
 def analyze_market_portfolio(request: MarketRequest) -> MarketPortfolio:
+    return load_market_portfolio(request)[0]
+
+
+def select_assets(request: MarketRequest) -> list[MarketAsset]:
     catalog = {a.symbol: a for a in assets()}
     unknown = [h.symbol for h in request.holdings if h.symbol not in catalog]
     if unknown:
         raise MarketDataError("unsupported_asset", "Choose assets from the supported catalog: " + ", ".join(unknown), 422)
-    selected = [catalog[h.symbol] for h in request.holdings]
+    return [catalog[h.symbol] for h in request.holdings]
+
+
+def load_market_portfolio(request: MarketRequest) -> tuple[MarketPortfolio, dict]:
+    """The calculated portfolio plus the raw price history it came from."""
+    selected = select_assets(request)
     history = get_history(selected, request.days)
-    return calculate_portfolio(request, selected, history)
+    return calculate_portfolio(request, selected, history), history
 
 
 def calculate_portfolio(request, selected, history) -> MarketPortfolio:
