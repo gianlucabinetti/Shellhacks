@@ -43,7 +43,20 @@ wallet is connected. The older quiz/dashboard demo still uses sample data.
   Bedrock it can run what-if mixes through a tool that recalculates them with
   real prices; "Load this mix" applies one to the dashboard. With
   `AI_PROVIDER=fallback` it answers common questions deterministically.
-
+- **Build it with AI:** describe a goal in plain words ("I'm 22, want growth
+  but can't handle big drops"). On Bedrock the AI backtests 2–3 candidate
+  mixes on real prices, picks the best fit, explains each holding, and loads
+  it into the dashboard, showing every candidate it tested. Offline, a keyword
+  model picks a template mix and backtests it the same way. Always labelled
+  an educational example, not a recommendation.
+- **Share + QR code:** the address bar always encodes the analyzed portfolio
+  (`?mix=BTC-USD:50,ETH-USD:30&amt=10000&d=90&vs=SPY`), and **Share** shows a
+  QR code, copy link, and the phone's native share sheet. Opening a link
+  re-runs that exact mix on live prices. See [Demo on phones](#demo-on-phones).
+- **Future range:** a fan chart of where today's amount could go in 1–10
+  years, using the mix's real volatility and an average return the user
+  picks (0%, 4%, or 7%). Shows typical, 1-in-20 bad and good outcomes, and the
+  chance of ending below the start. Clearly labelled *not a forecast*.
 - **Modern, motion-driven UI:** Geist type, glass surfaces, spring animations
   (`motion`), rolling numbers (`@number-flow/react`), and scroll reveals. All
   motion respects the operating system's reduced-motion setting.
@@ -55,9 +68,12 @@ New endpoints (new contracts; existing ones are unchanged):
 | `GET /api/market/ticker` | — | latest price, day change, market-open flag, and 30-day closes per symbol (cached 20 s) |
 | `POST /api/market/insights` | `{portfolio: MarketRequest, benchmark: "SPY" \| "60_40" \| "BTC" \| null}` | correlation matrix, diversification, contributions, benchmark series |
 | `POST /api/market/chat` | `{portfolio, benchmark, messages: [{role, content}]}` (last message from the user) | `{source, reply, what_ifs, suggestions}` |
+| `POST /api/market/build` | `{goal, initial_investment, days}` | `{source, name, summary, holdings: [{symbol, weight, reason}], result, tested}` |
+| `POST /api/market/projection` | `{portfolio, years: 1\|3\|5\|10, annual_return: -0.2…0.2}` | monthly `p5/p25/p50/p75/p95` bands, `probability_below_start`, volatility used, notes |
 
-Calculations live in `backend/analytics/insights.py`; prompts and the chat
-tool loop live in `backend/ai/chat.py`; the ticker lives in
+Calculations live in `backend/analytics/insights.py` and
+`backend/analytics/projection.py`; prompts and tool loops live in
+`backend/ai/chat.py` and `backend/ai/builder.py`; the ticker lives in
 `backend/services/market_live.py`.
 
 The new market screen is the default landing page and calls the backend.
@@ -104,6 +120,23 @@ Crypto prices work without Alpaca credentials. To run without AWS while trying
 the market screen, set `AI_PROVIDER=fallback` in the backend `.env`.
 
 For remote AWS editor forwarding and CORS, see [AWS_SETUP.md](AWS_SETUP.md).
+
+### Demo on phones
+
+Share links and QR codes only work on other devices if they can reach this
+computer. For a live demo on the same Wi-Fi:
+
+```bash
+cd frontend
+npm run dev:lan
+```
+
+Open the **Network** address Vite prints (for example
+`http://192.168.1.5:5173`) on the laptop, then use **Share**. The QR code now
+points at that address. Phones load the app from the laptop, and the Vite dev
+server forwards `/api` calls to the backend on port 8000, so no CORS or
+backend host changes are needed. Windows may ask to allow Node.js through the
+firewall the first time; allow it on private networks only.
 
 ## Enable stocks and ETFs
 

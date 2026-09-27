@@ -181,3 +181,58 @@ class MarketTicker(BaseModel):
     quotes: list[TickerQuote]
     fetched_at: datetime
     stocks_included: bool
+
+
+# --- Future range ------------------------------------------------------------------
+
+class ProjectionRequest(BaseModel):
+    model_config = ConfigDict(allow_inf_nan=False, extra="forbid")
+    portfolio: MarketRequest
+    years: Literal[1, 3, 5, 10] = 5
+    # The user's own assumption for the average yearly return; not estimated from the data.
+    annual_return: float = Field(default=0.05, ge=-0.2, le=0.2)
+
+
+class ProjectionPoint(BaseModel):
+    month: int
+    p5: float
+    p25: float
+    p50: float
+    p75: float
+    p95: float
+
+
+class Projection(BaseModel):
+    data_id: str
+    start_value: float
+    annual_volatility: float
+    annual_return: float
+    years: int
+    volatility_window_days: int
+    probability_below_start: float
+    points: list[ProjectionPoint]
+    notes: list[str]
+
+
+# --- Build it with AI -----------------------------------------------------------------
+
+class BuildRequest(BaseModel):
+    model_config = ConfigDict(allow_inf_nan=False, extra="forbid")
+    goal: str = Field(min_length=3, max_length=500)
+    initial_investment: float = Field(default=10000, gt=0, le=1000000)
+    days: Literal[30, 90, 365] = 365
+
+
+class BuiltHolding(BaseModel):
+    symbol: str
+    weight: float
+    reason: str
+
+
+class BuildResponse(BaseModel):
+    source: Literal["bedrock", "fallback"]
+    name: str
+    summary: str
+    holdings: list[BuiltHolding]
+    result: WhatIfResult
+    tested: list[WhatIfResult] = Field(default_factory=list)
