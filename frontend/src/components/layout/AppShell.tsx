@@ -9,6 +9,7 @@ interface AppShellProps {
   onMarkets: () => void
   onStartAssessment: () => void
   marketsActive: boolean
+  landingActive: boolean
   children: React.ReactNode
 }
 
@@ -19,7 +20,7 @@ const MARKET_TICKER = [
   { symbol: 'BTC', value: '$68,420', change: '+1.4%', positive: true },
 ]
 
-export function AppShell({ onHome, onMarkets, onStartAssessment, marketsActive, children }: AppShellProps) {
+export function AppShell({ onHome, onMarkets, onStartAssessment, marketsActive, landingActive, children }: AppShellProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const closeMenu = () => setMenuOpen(false)
 
@@ -48,7 +49,7 @@ export function AppShell({ onHome, onMarkets, onStartAssessment, marketsActive, 
             <button type="button" onClick={onMarkets} aria-current={marketsActive ? 'page' : undefined} className={marketsActive ? 'text-foreground' : 'text-muted-foreground transition-colors hover:text-foreground'}>Market portfolios</button>
           </nav>
           <div className="hidden items-center gap-4 md:flex">
-            {USE_MOCKS && <span className="font-market-data text-[0.62rem] uppercase text-muted-foreground">Fixture demo</span>}
+            {USE_MOCKS && !marketsActive && !landingActive && <span className="font-market-data text-[0.62rem] uppercase text-muted-foreground">Fixture demo</span>}
             <button type="button" onClick={onStartAssessment} className="inline-flex h-10 items-center gap-2 bg-primary px-4 text-xs font-bold uppercase tracking-wide text-primary-foreground transition-colors hover:bg-[#9acbff] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
               Start assessment <ArrowRight className="size-4" aria-hidden />
             </button>
@@ -70,7 +71,7 @@ export function AppShell({ onHome, onMarkets, onStartAssessment, marketsActive, 
             <button type="button" onClick={() => { onHome(); closeMenu() }} className="min-h-11 border-b border-white/10 px-2 text-left text-sm">Learn</button>
             <button type="button" onClick={() => { onMarkets(); closeMenu() }} className="min-h-11 border-b border-white/10 px-2 text-left text-sm">Market portfolios</button>
             <button type="button" onClick={() => { onStartAssessment(); closeMenu() }} className="mt-3 flex min-h-11 items-center justify-center gap-2 bg-primary px-3 text-sm font-semibold text-primary-foreground">Start assessment <ArrowRight className="size-4" aria-hidden /></button>
-            {USE_MOCKS && <p className="px-2 pt-3 font-market-data text-[0.62rem] uppercase text-muted-foreground">Fixture demo</p>}
+            {USE_MOCKS && !marketsActive && !landingActive && <p className="px-2 pt-3 font-market-data text-[0.62rem] uppercase text-muted-foreground">Fixture demo</p>}
           </div>
         </nav>
       )}

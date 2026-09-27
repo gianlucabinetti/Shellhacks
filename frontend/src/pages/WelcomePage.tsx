@@ -1,5 +1,6 @@
 import { ArrowRight, BookOpen, Landmark, Layers, TrendingUp } from 'lucide-react'
 
+import { HeroBackgroundVideo } from '@/components/common/HeroBackgroundVideo'
 import { Button } from '@/components/ui/button'
 
 const STEPS = [
@@ -51,9 +52,8 @@ export function WelcomePage({ onStart, onExploreDemo }: { onStart: () => void; o
   return (
     <div className="flex flex-col gap-14 py-2 sm:gap-20 sm:py-4">
       <section className="welcome-bleed relative isolate overflow-hidden border-y border-white/10 bg-[#101416]">
-        <div className="market-grid absolute inset-0 -z-20 opacity-40" aria-hidden />
-        <MarketBackdrop />
-        <div className="mx-auto grid min-h-[34rem] max-w-[1440px] items-center gap-10 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1.05fr_0.95fr] lg:px-14 lg:py-24">
+        <HeroBackgroundVideo />
+        <div className="relative z-10 mx-auto grid min-h-[34rem] max-w-[1440px] items-center gap-10 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1.05fr_0.95fr] lg:px-14 lg:py-24">
           <div className="enter-up max-w-3xl">
             <p className="eyebrow mb-5 flex items-center gap-3"><span className="size-2 bg-[var(--positive)]" aria-hidden /> Financial literacy / Portfolio lab</p>
             <h1 className="font-editorial max-w-[13ch] text-6xl font-semibold uppercase leading-[0.88] tracking-normal text-balance sm:text-7xl lg:text-8xl">
@@ -172,19 +172,3 @@ export function WelcomePage({ onStart, onExploreDemo }: { onStart: () => void; o
     </div>
   )
 }
-
-function MarketBackdrop() {
-  return (
-    <svg className="pointer-events-none absolute inset-0 -z-10 h-full w-full opacity-30" viewBox="0 0 1440 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-      <g stroke="#c5d3d2" strokeOpacity=".3" strokeWidth="1">
-        <path d="M0 120H1440M0 240H1440M0 360H1440M0 480H1440M0 600H1440" />
-        <path d="M120 0V700M360 0V700M600 0V700M840 0V700M1080 0V700M1320 0V700" />
-      </g>
-      <path d="M0 520 C90 504 112 452 198 468 S300 392 376 418 S494 350 568 376 S668 300 750 329 S860 270 924 282 S1032 201 1114 238 S1230 150 1292 177 S1380 122 1440 98" fill="none" stroke="#75b7ff" strokeWidth="2" className="market-line" />
-      <g fill="#75b7ff">
-        <circle cx="198" cy="468" r="3" /><circle cx="568" cy="376" r="3" /><circle cx="924" cy="282" r="3" /><circle cx="1292" cy="177" r="3" />
-      </g>
-    </svg>
-  )
-}
-
