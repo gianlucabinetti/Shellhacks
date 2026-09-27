@@ -102,6 +102,18 @@
     "category": "Individual stock"
   },
   {
+    "symbol": "GLD",
+    "name": "SPDR Gold Shares",
+    "asset_class": "stock",
+    "category": "Gold ETF"
+  },
+  {
+    "symbol": "SLV",
+    "name": "iShares Silver Trust",
+    "asset_class": "stock",
+    "category": "Silver ETF"
+  },
+  {
     "symbol": "BND",
     "name": "Vanguard Total Bond Market ETF",
     "asset_class": "bond",
