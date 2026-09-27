@@ -11,7 +11,7 @@ export function RiskLevelMeter({ profile, className }: { profile: RiskProfile; c
         {[1, 2, 3].map((step) => (
           <span
             key={step}
-            className="h-2 w-6 rounded-full bg-muted"
+            className="h-1.5 w-6 rounded-sm bg-muted"
             style={step <= level ? { backgroundColor: colorVar } : undefined}
           />
         ))}

@@ -1,48 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --radius: 0.75rem;
-  --background: oklch(0.985 0.002 247);
-  --foreground: oklch(0.2 0.02 260);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.02 260);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.02 260);
-  --primary: oklch(0.49 0.16 256);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.96 0.006 250);
-  --secondary-foreground: oklch(0.25 0.02 260);
-  --muted: oklch(0.96 0.006 250);
-  --muted-foreground: oklch(0.5 0.02 260);
-  --accent: oklch(0.95 0.02 256);
-  --accent-foreground: oklch(0.3 0.08 256);
-  --destructive: oklch(0.58 0.22 27);
-  --border: oklch(0.91 0.008 250);
-  --input: oklch(0.91 0.008 250);
-  --ring: oklch(0.49 0.16 256);
-
-  /* Chart tokens: validated categorical order (blue, orange, aqua, yellow) */
-  --chart-1: #2a78d6;
-  --chart-2: #eb6834;
-  --chart-3: #1baf7a;
-  --chart-4: #eda100;
-  --chart-grid: #e1e0d9;
-  --chart-axis: #898781;
-
-  /* Risk-level accents (UI chrome only, always paired with a text label) */
-  --risk-conservative: #1baf7a;
-  --risk-moderate: #2a78d6;
-  --risk-aggressive: #eb6834;
+  --radius: 0.35rem;
+  --background: #101214;
+  --foreground: #f0eee8;
+  --card: #181b1d;
+  --card-foreground: #f0eee8;
+  --popover: #202426;
+  --popover-foreground: #f0eee8;
+  --primary: #75b7ff;
+  --primary-foreground: #07111a;
+  --secondary: #282d30;
+  --secondary-foreground: #ecebe5;
+  --muted: #222628;
+  --muted-foreground: #a2a7a8;
+  --accent: #243545;
+  --accent-foreground: #b8dcff;
+  --destructive: #fa786f;
+  --border: #353a3d;
+  --input: #3b4245;
+  --ring: #75b7ff;
+  --chart-1: #75b7ff;
+  --chart-2: #77d6a0;
+  --chart-3: #f2b16e;
+  --chart-4: #c0a8ef;
+  --chart-grid: #343a3d;
+  --chart-axis: #989f9f;
+  --positive: #77d6a0;
+  --negative: #fa786f;
+  --risk-conservative: #77d6a0;
+  --risk-moderate: #75b7ff;
+  --risk-aggressive: #f2b16e;
 }
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
   --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: "DM Sans", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -74,9 +75,112 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    scroll-behavior: smooth;
+    overflow-x: clip;
+  }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-family: "DM Sans", sans-serif;
+    overflow-x: clip;
+  }
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+  ::selection {
+    color: #07111a;
+    background: #a5d2ff;
+  }
+}
+
+.font-editorial {
+  font-family: "Barlow Condensed", "DM Sans", sans-serif;
+}
+
+.font-market-data {
+  font-family: "IBM Plex Mono", monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.eyebrow {
+  color: #aeb4b4;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ticker-track {
+  animation: ticker-scroll 42s linear infinite;
+}
+
+.ticker-viewport:hover .ticker-track {
+  animation-play-state: paused;
+}
+
+.market-grid {
+  background-image: linear-gradient(#ffffff0a 1px, transparent 1px), linear-gradient(90deg, #ffffff0a 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+.welcome-bleed {
+  position: relative;
+  left: 50%;
+  width: 100vw;
+  margin-left: -50vw;
+}
+
+.market-line {
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 1200;
+  animation: draw-line 3.2s ease-out forwards;
+}
+
+.market-feature-grid {
+  background-image: linear-gradient(#10121414 1px, transparent 1px), linear-gradient(90deg, #10121414 1px, transparent 1px);
+  background-size: 42px 42px;
+}
+
+.enter-up {
+  animation: enter-up 650ms both;
+}
+
+.enter-up-delay {
+  animation: enter-up 750ms 120ms both;
+}
+
+.font-editorial {
+  font-weight: 600;
+}
+
+@keyframes ticker-scroll {
+  to { transform: translateX(-50%); }
+}
+
+@keyframes draw-line {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes enter-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .ticker-track {
+    animation: none;
+    transform: none;
   }
 }
 

@@ -7,7 +7,7 @@ export interface TooltipRow {
 
 export function ChartTooltip({ title, rows }: { title?: string; rows: TooltipRow[] }) {
   return (
-    <div className="rounded-lg border bg-popover px-3 py-2 text-xs shadow-md">
+    <div className="rounded-sm border bg-popover px-3 py-2 text-xs shadow-lg shadow-black/30">
       {title && <p className="mb-1 font-medium text-foreground">{title}</p>}
       <ul className="flex flex-col gap-1">
         {rows.map((row) => (

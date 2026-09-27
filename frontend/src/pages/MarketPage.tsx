@@ -19,7 +19,7 @@ const money = (value: number) => new Intl.NumberFormat(undefined, {
   maximumFractionDigits: value < 1 ? 6 : 2,
 }).format(value)
 const percent = (value: number) => new Intl.NumberFormat(undefined, { style: 'percent', maximumFractionDigits: 2 }).format(value)
-const control = 'h-10 rounded-md border bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-primary'
+const control = 'h-10 rounded-sm border bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-primary'
 const message = (error: unknown) => error instanceof Error ? error.message : 'Something went wrong.'
 
 export function MarketPage() {
@@ -59,14 +59,14 @@ export function MarketPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <span className="text-xs font-semibold uppercase tracking-widest text-primary">Alpaca market data</span>
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Explore a portfolio of possibilities</h1>
-        <p className="max-w-3xl text-muted-foreground">
+      <div className="flex flex-col gap-2 border-b border-white/15 pb-5">
+        <span className="eyebrow text-primary">Historical market data / Portfolio lab</span>
+        <h1 className="font-editorial text-4xl font-semibold uppercase leading-none sm:text-5xl">Explore a portfolio of possibilities</h1>
+        <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
           Build an example mix of crypto, stocks, and ETFs. See how it would have performed using
           actual historical prices, without connecting a wallet or personal investment account.
         </p>
-        <p className="text-sm text-muted-foreground">Completed daily prices · Fictional holdings · No trades</p>
+        <p className="font-market-data text-[0.62rem] uppercase text-muted-foreground">Completed daily prices · Fictional holdings · No trades</p>
       </div>
 
       <Card>
@@ -84,7 +84,7 @@ export function MarketPage() {
             <Button variant="outline" disabled={!catalog.data?.stocks_configured} onClick={() => setWeights({ VTI: 50, BND: 30, 'BTC/USD': 10, 'ETH/USD': 10 })}>Mixed example</Button>
           </div>
           {catalog.data && !catalog.data.stocks_configured && (
-            <p className="rounded-lg border bg-muted/40 p-3 text-sm">
+            <p className="border border-amber-300/25 bg-amber-950/25 p-3 text-sm text-amber-100">
               Crypto data is available without an account. Stock and ETF examples become available
               when the app owner configures Alpaca market-data credentials.
             </p>
@@ -102,7 +102,7 @@ export function MarketPage() {
                   const selected = asset.symbol in weights
                   const locked = asset.asset_class !== 'crypto' && !catalog.data?.stocks_configured
                   return (
-                    <label key={asset.symbol} className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 ${selected ? 'border-primary bg-primary/5' : ''} ${locked ? 'opacity-50' : ''}`}>
+                    <label key={asset.symbol} className={`flex cursor-pointer items-start gap-3 border p-3 transition-colors ${selected ? 'border-primary/60 bg-primary/[0.08]' : 'border-border hover:border-white/30'} ${locked ? 'opacity-50' : ''}`}>
                       <input className="mt-1" type="checkbox" checked={selected}
                         disabled={locked || (!selected && count >= 12)} onChange={() => toggle(asset.symbol)} />
                       <span className="min-w-0">
@@ -185,8 +185,8 @@ function ReportDetails({ data }: { data: MarketPortfolio }) {
   ]
   return (
     <div className="flex flex-col gap-6">
-      <div className="rounded-lg border border-sky-200 bg-sky-50 p-4 text-sm text-sky-950">
-        <p className="font-medium">Actual historical prices · Hypothetical portfolio</p>
+      <div className="border border-primary/25 bg-primary/[0.06] p-4 text-sm text-[#d2e7fb]">
+        <p className="font-semibold">Actual historical prices · Hypothetical portfolio</p>
         <p>{data.start_date} to {data.end_date} · {data.feeds.join(' + ')}</p>
         <p className="mt-1 text-xs">Fetched {new Date(data.fetched_at).toLocaleString()} · {data.cached ? 'Cached response' : 'Fetched from provider'}. Closing dates are shown for each asset below.</p>
       </div>

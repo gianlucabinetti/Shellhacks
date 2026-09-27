@@ -27,7 +27,7 @@ interface PerformanceChartProps {
 export function PerformanceChart({
   points,
   baseline,
-  color = 'var(--chart-1)',
+  color,
   currency = 'USD',
   height = 280,
   preciseDates = false,
@@ -36,7 +36,8 @@ export function PerformanceChart({
     return <p className="py-8 text-center text-sm text-muted-foreground">No performance history yet.</p>
   }
 
-  const gradientId = `perf-fill-${color.replace(/[^a-z0-9]/gi, '')}`
+  const lineColor = color ?? (points[points.length - 1].value >= (baseline ?? points[0].value) ? 'var(--positive)' : 'var(--negative)')
+  const gradientId = `perf-fill-${lineColor.replace(/[^a-z0-9]/gi, '')}`
   const showYearTicks = !preciseDates && points.length > 24
   const dateLabel = (date: string) => preciseDates
     ? new Date(date + 'T00:00:00Z').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
@@ -54,8 +55,8 @@ export function PerformanceChart({
         <AreaChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity={0.18} />
-              <stop offset="100%" stopColor={color} stopOpacity={0} />
+              <stop offset="0%" stopColor={lineColor} stopOpacity={0.18} />
+              <stop offset="100%" stopColor={lineColor} stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid vertical={false} stroke="var(--chart-grid)" />
@@ -88,7 +89,7 @@ export function PerformanceChart({
               return (
                 <ChartTooltip
                   title={dateLabel(point.date)}
-                  rows={[{ label: 'Value', value: formatCurrency(point.value, currency), color }]}
+                  rows={[{ label: 'Value', value: formatCurrency(point.value, currency), color: lineColor }]}
                 />
               )
             }}
@@ -96,7 +97,7 @@ export function PerformanceChart({
           <Area
             type="monotone"
             dataKey="value"
-            stroke={color}
+            stroke={lineColor}
             strokeWidth={2}
             fill={`url(#${gradientId})`}
             activeDot={{ r: 5, stroke: 'var(--card)', strokeWidth: 2 }}

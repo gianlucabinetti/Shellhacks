@@ -78,7 +78,7 @@ function StackedBar({ label, slices }: { label: string; slices: AllocationSlice[
         {visible.map((s) => (
           <div
             key={s.assetClass}
-            className="rounded-sm first:rounded-l-md last:rounded-r-md"
+            className="rounded-[1px]"
             style={{ flexGrow: s.weight, flexBasis: 0, backgroundColor: ASSET_CLASS_COLORS[s.assetClass] }}
             title={`${s.label}: ${formatPercent(s.weight, 0)}`}
           />

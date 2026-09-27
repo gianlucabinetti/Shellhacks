@@ -6,8 +6,8 @@ import { USE_MOCKS } from '@/services/api'
 export function MockDataNotice({ children }: { children: React.ReactNode }) {
   if (!USE_MOCKS) return null
   return (
-    <p className="flex items-start gap-2 rounded-lg border border-dashed border-violet-300 bg-violet-50 p-3 text-sm text-violet-950">
-      <FlaskConical className="mt-0.5 size-4 shrink-0" aria-hidden />
+    <p className="flex items-start gap-2 border border-dashed border-primary/30 bg-primary/[0.06] p-3 text-sm text-[#d2e7fb]">
+      <FlaskConical className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
       <span>{children}</span>
     </p>
   )

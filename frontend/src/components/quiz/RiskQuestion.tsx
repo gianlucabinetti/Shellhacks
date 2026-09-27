@@ -13,10 +13,10 @@ export function RiskQuestion({ question, value, onChange }: RiskQuestionProps) {
   return (
     <fieldset className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
-        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <span className="eyebrow">
           {question.category === 'experience' ? 'About you' : 'Comfort with risk'}
         </span>
-        <legend id={headingId} className="text-xl font-semibold sm:text-2xl">
+        <legend id={headingId} className="font-editorial text-2xl font-semibold leading-tight sm:text-3xl">
           {question.prompt}
         </legend>
         {question.helpText && <p className="text-sm text-muted-foreground">{question.helpText}</p>}
@@ -30,8 +30,8 @@ export function RiskQuestion({ question, value, onChange }: RiskQuestionProps) {
               key={option.id}
               htmlFor={id}
               className={cn(
-                'flex cursor-pointer items-center gap-3 rounded-lg border bg-card p-4 transition-colors hover:border-primary/50',
-                selected && 'border-primary bg-accent ring-1 ring-primary',
+                'flex cursor-pointer items-center gap-3 border border-white/15 bg-card p-4 transition-colors hover:border-primary/60 hover:bg-white/[0.03] focus-within:outline-2 focus-within:outline-primary',
+                selected && 'border-primary/70 bg-accent ring-1 ring-inset ring-primary/60',
               )}
             >
               <RadioGroupItem id={id} value={option.id} />

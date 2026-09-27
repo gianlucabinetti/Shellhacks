@@ -95,7 +95,7 @@ function RiskChangeBody({
         role="alert"
         className={cn(
           'flex items-start gap-3 rounded-lg border p-4 text-sm',
-          moreRisk ? 'border-amber-300 bg-amber-50 text-amber-950' : 'border-slate-200 bg-slate-50',
+          moreRisk ? 'border-amber-400/40 bg-amber-950/30 text-amber-100' : 'border-white/15 bg-white/5 text-foreground',
         )}
       >
         <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
@@ -134,7 +134,7 @@ function RiskChangeBody({
             />
           </section>
 
-          <label className="flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm">
+          <label className="flex cursor-pointer items-start gap-3 border border-white/15 bg-white/[0.03] p-3 text-sm">
             <input
               type="checkbox"
               className="mt-0.5 size-4 accent-[var(--primary)]"

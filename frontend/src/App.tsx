@@ -28,9 +28,16 @@ export default function App() {
   }
 
   return (
-    <AppShell onHome={() => go({ name: 'welcome' })} onMarkets={() => go({ name: 'markets' })} marketsActive={step.name === 'markets'}>
+    <AppShell
+      onHome={() => go({ name: 'welcome' })}
+      onMarkets={() => go({ name: 'markets' })}
+      onStartAssessment={() => go({ name: 'quiz' })}
+      marketsActive={step.name === 'markets'}
+    >
       {step.name === 'markets' && <MarketPage />}
-      {step.name === 'welcome' && <WelcomePage onStart={() => go({ name: 'quiz' })} />}
+      {step.name === 'welcome' && (
+        <WelcomePage onStart={() => go({ name: 'quiz' })} onExploreDemo={() => go({ name: 'markets' })} />
+      )}
 
       {step.name === 'quiz' && (
         <QuizPage onComplete={(assessment) => go({ name: 'result', assessment })} />

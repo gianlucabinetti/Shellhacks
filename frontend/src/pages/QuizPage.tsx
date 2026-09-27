@@ -33,10 +33,11 @@ export function QuizPage({ onComplete }: QuizPageProps) {
   }
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6">
+    <div className="mx-auto flex max-w-3xl flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Your risk profile quiz</h1>
-        <p className="mt-1 text-muted-foreground">
+        <p className="eyebrow">Portfolio simulator / Risk assessment</p>
+        <h1 className="font-editorial mt-2 text-4xl font-semibold uppercase leading-none sm:text-5xl">Your risk profile quiz</h1>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
           A few quick questions. Answer honestly: there are no wrong answers.
         </p>
       </div>

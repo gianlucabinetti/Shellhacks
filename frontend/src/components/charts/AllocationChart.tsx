@@ -34,7 +34,7 @@ export function AllocationChart({ allocation, centerLabel, centerSubLabel }: All
               paddingAngle={0}
               stroke="var(--card)"
               strokeWidth={2}
-              cornerRadius={4}
+              cornerRadius={2}
               isAnimationActive={false}
             >
               {slices.map((s) => (

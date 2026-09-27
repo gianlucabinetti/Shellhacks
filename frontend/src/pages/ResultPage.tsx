@@ -26,12 +26,12 @@ const IMPACT_META: Record<RiskFactor['impact'], { Icon: typeof Minus; text: stri
 
 export function ResultPage({ result, onContinue, onRetake }: ResultPageProps) {
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6">
+    <div className="mx-auto flex max-w-3xl flex-col gap-6">
       <RiskProfileCard profile={result.riskProfile} description={result.summary}>
         {result.factors.length > 0 && (
           <div>
-            <h2 className="mb-2 text-sm font-medium">What shaped this result</h2>
-            <ul className="flex flex-col divide-y rounded-lg border">
+            <h2 className="eyebrow mb-2">What shaped this result</h2>
+            <ul className="flex flex-col divide-y divide-white/10 border border-white/15">
               {result.factors.map((factor) => {
                 const { Icon, text } = IMPACT_META[factor.impact]
                 return (
@@ -49,7 +49,7 @@ export function ResultPage({ result, onContinue, onRetake }: ResultPageProps) {
         )}
       </RiskProfileCard>
 
-      <div className="flex items-start gap-3 rounded-xl border bg-card p-4">
+      <div className="flex items-start gap-3 border border-white/15 bg-card p-4">
         <GraduationCap className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden />
         <div className="text-sm">
           <p className="font-medium">Experience level: {EXPERIENCE_LABELS[result.experienceLevel]}</p>
@@ -66,7 +66,7 @@ export function ResultPage({ result, onContinue, onRetake }: ResultPageProps) {
 
       <Disclaimer>{result.disclaimer}</Disclaimer>
 
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+      <div className="flex flex-col-reverse gap-2 border-t border-white/15 pt-4 sm:flex-row sm:justify-between">
         <Button variant="ghost" onClick={onRetake}>
           <RotateCcw /> Retake quiz
         </Button>

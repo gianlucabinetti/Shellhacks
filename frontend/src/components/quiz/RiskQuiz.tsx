@@ -33,9 +33,9 @@ export function RiskQuiz({ questionnaire, submitting, onSubmit }: RiskQuizProps)
   }
 
   return (
-    <Card className="gap-0 py-0">
-      <div className="flex items-center gap-3 border-b px-6 py-4">
-        <span className="shrink-0 text-sm text-muted-foreground">
+    <Card className="gap-0 border-white/15 py-0 shadow-none">
+      <div className="flex items-center gap-3 border-b border-white/15 px-5 py-4 sm:px-6">
+        <span className="font-market-data shrink-0 text-xs uppercase text-muted-foreground">
           Question {index + 1} of {questions.length}
         </span>
         <Progress value={progress} aria-label="Quiz progress" />
@@ -48,7 +48,7 @@ export function RiskQuiz({ questionnaire, submitting, onSubmit }: RiskQuizProps)
           onChange={(optionId) => setAnswers((a) => ({ ...a, [question.id]: optionId }))}
         />
       </CardContent>
-      <CardFooter className="justify-between border-t py-4">
+      <CardFooter className="justify-between border-t border-white/15 py-4">
         <Button
           variant="ghost"
           onClick={() => setIndex((i) => i - 1)}

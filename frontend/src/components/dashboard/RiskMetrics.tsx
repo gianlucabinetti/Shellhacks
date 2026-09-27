@@ -47,17 +47,17 @@ export function RiskMetrics({
   return (
     <dl className="grid gap-3 sm:grid-cols-3">
       {METRICS.map((m) => (
-        <div key={m.key} className="flex flex-col gap-1 rounded-lg border bg-card p-4">
-          <dt className="text-sm text-muted-foreground">{m.label}</dt>
+        <div key={m.key} className="flex flex-col gap-2 border-t border-white/15 py-4 first:border-t-0 sm:border-t-0 sm:border-l sm:pl-4 sm:first:border-l-0 sm:first:pl-0">
+          <dt className="eyebrow">{m.label}</dt>
           {proposed ? (
             <dd className="flex flex-col gap-0.5 tabular-nums">
-              <span className="text-2xl font-semibold">{m.format(proposed[m.key])}</span>
+              <span className={`font-market-data text-2xl font-medium ${m.key === 'annualizedReturn' ? 'text-[var(--positive)]' : m.key === 'maxDrawdown' ? 'text-[var(--negative)]' : ''}`}>{m.format(proposed[m.key])}</span>
               <span className="text-xs text-muted-foreground">
                 was {m.format(analytics[m.key])} with {currentLabel}
               </span>
             </dd>
           ) : (
-            <dd className="text-2xl font-semibold tabular-nums">{m.format(analytics[m.key])}</dd>
+            <dd className={`font-market-data text-2xl font-medium tabular-nums ${m.key === 'annualizedReturn' ? 'text-[var(--positive)]' : m.key === 'maxDrawdown' ? 'text-[var(--negative)]' : ''}`}>{m.format(analytics[m.key])}</dd>
           )}
           {!compact && <dd className="text-xs text-muted-foreground">{m.explain}</dd>}
         </div>

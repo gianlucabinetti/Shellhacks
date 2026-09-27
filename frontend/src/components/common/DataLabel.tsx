@@ -10,22 +10,22 @@ const KIND_META: Record<DataKind, { label: string; Icon: typeof History; classNa
   historical: {
     label: 'Historical data',
     Icon: History,
-    className: 'bg-slate-100 text-slate-700 border-slate-200',
+    className: 'bg-white/5 text-[#c5c9c7] border-white/15',
   },
   simulated: {
     label: 'Simulated portfolio',
     Icon: FlaskConical,
-    className: 'bg-violet-50 text-violet-700 border-violet-200',
+    className: 'bg-primary/10 text-primary border-primary/25',
   },
   hypothetical: {
     label: 'Hypothetical scenario',
     Icon: Lightbulb,
-    className: 'bg-amber-50 text-amber-800 border-amber-200',
+    className: 'bg-amber-950/30 text-amber-200 border-amber-300/25',
   },
   ai: {
     label: 'AI-generated',
     Icon: Sparkles,
-    className: 'bg-sky-50 text-sky-700 border-sky-200',
+    className: 'bg-sky-950/30 text-sky-200 border-sky-300/25',
   },
 }
 
@@ -34,7 +34,7 @@ export function DataLabel({ kind, className }: { kind: DataKind; className?: str
   return (
     <span
       className={cn(
-        'inline-flex w-fit items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium',
+        'inline-flex w-fit items-center gap-1 border px-2 py-0.5 text-[0.65rem] font-medium',
         kindClass,
         className,
       )}

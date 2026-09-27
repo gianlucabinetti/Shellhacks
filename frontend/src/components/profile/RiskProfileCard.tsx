@@ -22,12 +22,12 @@ export function RiskProfileCard({
   const meta = RISK_PROFILE_META[profile]
   return (
     <Card className={cn('overflow-hidden', className)}>
-      <div className="h-1.5 -mt-6" style={{ backgroundColor: meta.colorVar }} aria-hidden />
+      <div className="-mt-5 h-1" style={{ backgroundColor: meta.colorVar }} aria-hidden />
       <CardHeader>
         <CardDescription>{eyebrow}</CardDescription>
-        <CardTitle className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-3xl">
+        <CardTitle className="font-editorial flex flex-wrap items-baseline gap-x-3 gap-y-1 text-4xl uppercase">
           {meta.name}
-          <span className={cn('text-base font-medium', meta.textClass)}>{meta.tagline}</span>
+          <span className={cn('font-sans text-sm font-medium normal-case', meta.textClass)}>{meta.tagline}</span>
         </CardTitle>
         <RiskLevelMeter profile={profile} className="mt-1" />
       </CardHeader>

@@ -11,7 +11,7 @@ export function HoldingsTable({ holdings, currency }: { holdings: Holding[]; cur
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b text-left text-xs text-muted-foreground">
+          <tr className="border-b border-white/15 text-left text-[0.65rem] uppercase tracking-wide text-muted-foreground">
             <th scope="col" className="py-2 pr-4 font-medium">Fund</th>
             <th scope="col" className="py-2 pr-4 text-right font-medium">Weight</th>
             <th scope="col" className="py-2 text-right font-medium">Simulated value</th>
@@ -19,7 +19,7 @@ export function HoldingsTable({ holdings, currency }: { holdings: Holding[]; cur
         </thead>
         <tbody>
           {holdings.map((h) => (
-            <tr key={h.ticker} className="border-b last:border-0">
+            <tr key={h.ticker} className="border-b border-white/10 transition-colors hover:bg-white/[0.025] last:border-0">
               <td className="py-3 pr-4">
                 <div className="flex items-center gap-2">
                   <span

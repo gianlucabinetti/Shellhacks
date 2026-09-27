@@ -59,9 +59,13 @@ export function DashboardPage({ riskProfile, onRiskProfileChange }: DashboardPag
 
   return (
     <div className={cn('flex flex-col gap-6 transition-opacity', updating && 'pointer-events-none opacity-60')}>
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Your example portfolio</h1>
-        <p className="text-muted-foreground">{portfolio.description}</p>
+      <div className="flex flex-col gap-2 border-b border-white/15 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="eyebrow">Portfolio workstation / Illustrative account</p>
+          <h1 className="font-editorial mt-2 text-4xl font-semibold uppercase leading-none sm:text-5xl">Your example portfolio</h1>
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{portfolio.description}</p>
+        </div>
+        <span className="font-market-data text-[0.62rem] uppercase text-muted-foreground">Risk profile: {RISK_PROFILE_META[riskProfile].name}</span>
       </div>
 
       <MockDataNotice>
@@ -80,7 +84,7 @@ export function DashboardPage({ riskProfile, onRiskProfileChange }: DashboardPag
       {justChangedTo && !overview.error && (
         <div
           role="status"
-          className="flex items-start justify-between gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950"
+          className="flex items-start justify-between gap-3 border border-emerald-400/30 bg-emerald-950/25 p-4 text-sm text-emerald-100"
         >
           <span className="flex items-start gap-2">
             <CheckCircle2 className="mt-0.5 size-4 shrink-0" aria-hidden />
@@ -95,7 +99,7 @@ export function DashboardPage({ riskProfile, onRiskProfileChange }: DashboardPag
         </div>
       )}
 
-      <PortfolioSummary portfolio={portfolio} />
+      <PortfolioSummary portfolio={portfolio} analytics={analytics} />
 
       <div className="grid gap-6 lg:grid-cols-5">
         <Card className="lg:col-span-3">
