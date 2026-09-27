@@ -11,5 +11,10 @@ export default defineConfig({
       '@': path.resolve(import.meta.dirname, './src'),
     },
   },
+  server: {
+    // Lets phones on the same Wi-Fi use the app (npm run dev:lan): API calls go
+    // through this dev server to the backend on the laptop, so no CORS changes are needed.
+    proxy: { '/api': 'http://localhost:8000' },
+  },
 })
 

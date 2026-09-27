@@ -1,6 +1,5 @@
 .env
 .env.*
-
 !frontend/.env.development
 __pycache__/
 *.py[cod]

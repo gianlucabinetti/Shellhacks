@@ -1,6 +1,12 @@
 import type { ApiErrorBody } from '@/types/api'
 
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
+const CONFIGURED_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
+const LOCAL = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/
+// On a phone opening the laptop's network address, "localhost" would mean the phone
+// itself; use same-origin requests through the Vite proxy instead.
+const BASE_URL = LOCAL.test(CONFIGURED_URL) && !['localhost', '127.0.0.1'].includes(window.location.hostname)
+  ? ''
+  : CONFIGURED_URL
 
 export class ApiError extends Error {
   readonly status: number

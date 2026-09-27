@@ -15,6 +15,22 @@ WHAT_IF_TOOL = "analyze_what_if"
 MAX_WHAT_IFS = 3
 MAX_TOOL_ROUNDS = 4
 
+WHAT_IF_SPEC = {"toolSpec": {
+    "name": WHAT_IF_TOOL,
+    "description": ("Recalculate a DIFFERENT portfolio over the same period and starting "
+                    "amount using actual historical prices. Pass the complete new mix; weights "
+                    "are fractions that sum to 1."),
+    "inputSchema": {"json": {
+        "type": "object",
+        "properties": {"holdings": {"type": "array", "items": {
+            "type": "object",
+            "properties": {"symbol": {"type": "string"}, "weight": {"type": "number"}},
+            "required": ["symbol", "weight"],
+        }}},
+        "required": ["holdings"],
+    }},
+}}
+
 CHAT_SYSTEM_PROMPT = """You are Portfolio X-Ray's educational assistant. You help a beginner
 understand ONE hypothetical portfolio that was analyzed with actual historical prices.
 
@@ -182,21 +198,7 @@ class BedrockPortfolioChat:
             response = self.client.converse(
                 modelId=self.model, system=[{"text": system}], messages=convo,
                 inferenceConfig={"maxTokens": 700, "temperature": 0.1},
-                toolConfig={"tools": [{"toolSpec": {
-                    "name": WHAT_IF_TOOL,
-                    "description": ("Recalculate a DIFFERENT portfolio over the same period and starting "
-                                    "amount using actual historical prices. Pass the complete new mix; weights "
-                                    "are fractions that sum to 1."),
-                    "inputSchema": {"json": {
-                        "type": "object",
-                        "properties": {"holdings": {"type": "array", "items": {
-                            "type": "object",
-                            "properties": {"symbol": {"type": "string"}, "weight": {"type": "number"}},
-                            "required": ["symbol", "weight"],
-                        }}},
-                        "required": ["holdings"],
-                    }},
-                }}]},
+                toolConfig={"tools": [WHAT_IF_SPEC]},
             )
             message = response["output"]["message"]
             if response.get("stopReason") != "tool_use":

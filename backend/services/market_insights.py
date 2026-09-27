@@ -1,6 +1,7 @@
 """Benchmark comparison, correlation, and diversification for a market portfolio."""
 from pydantic import ValidationError
 
+from backend.analytics.projection import probability_below, project_range
 from backend.analytics.insights import (
     aligned_returns,
     correlation_matrix,
@@ -18,6 +19,8 @@ from backend.models.market import (
     MarketInsights,
     MarketPortfolio,
     MarketRequest,
+    Projection,
+    ProjectionRequest,
     ReturnContribution,
     WhatIfResult,
 )
@@ -104,6 +107,11 @@ def compare_benchmark(benchmark: BenchmarkId, portfolio: MarketPortfolio) -> Ben
 
 def run_what_if(base: MarketRequest, holdings: list[dict]) -> WhatIfResult:
     """Recalculate a model-proposed mix over the same period; ValueError explains bad input."""
+    return backtest_mix(holdings, base.initial_investment, base.days)
+
+
+def backtest_mix(holdings: list[dict], initial_investment: float, days: int) -> WhatIfResult:
+    """Backtest any {symbol, weight} list on real prices; weights are normalized, ValueError explains bad input."""
     weights: dict[str, float] = {}
     for h in holdings:
         try:
@@ -121,7 +129,7 @@ def run_what_if(base: MarketRequest, holdings: list[dict]) -> WhatIfResult:
     try:
         request = MarketRequest(
             holdings=[{"symbol": s, "weight": w} for s, w in zip(symbols, fractions)],
-            initial_investment=base.initial_investment, days=base.days,
+            initial_investment=initial_investment, days=days,
         )
         portfolio, history = load_market_portfolio(request)
     except ValidationError:
@@ -133,4 +141,26 @@ def run_what_if(base: MarketRequest, holdings: list[dict]) -> WhatIfResult:
         holdings=request.holdings, total_return=portfolio.total_return,
         annualized_volatility=portfolio.annualized_volatility, max_drawdown=portfolio.max_drawdown,
         final_value=portfolio.final_value, diversification_score=stats.score,
+    )
+
+
+def build_projection(request: ProjectionRequest) -> Projection:
+    portfolio = analyze_market_portfolio(request.portfolio)
+    start = request.portfolio.initial_investment
+    vol = portfolio.annualized_volatility
+    window = (portfolio.end_date - portfolio.start_date).days + 1
+    notes = [
+        f"Uses this mix's real annualized volatility ({vol * 100:.1f}%) measured from {portfolio.start_date} to "
+        f"{portfolio.end_date}, and your assumed average return of {request.annual_return * 100:.0f}% a year.",
+        "Log-normal model: bands show where 50% and 90% of outcomes would fall if the future had the same volatility. "
+        "Real markets have crashes, regime changes, and fees this does not capture.",
+        "Not a forecast. It shows how wide the range of outcomes gets with this level of volatility.",
+    ]
+    if window < 365:
+        notes.append(f"Volatility was measured over only {window} days; a 1-year look-back gives a steadier estimate.")
+    return Projection(
+        data_id=portfolio.data_id, start_value=start, annual_volatility=vol,
+        annual_return=request.annual_return, years=request.years, volatility_window_days=window,
+        probability_below_start=probability_below(start, start, vol, request.annual_return, request.years),
+        points=project_range(start, vol, request.annual_return, request.years), notes=notes,
     )

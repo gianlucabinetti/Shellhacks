@@ -1,24 +1,28 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import {
-  Bitcoin, Bot, Check, Globe2, Landmark, MessageCircleQuestion, Plus, RefreshCw, Scale, Shuffle, Sparkles, X,
+  Bitcoin, Bot, Check, Globe2, Landmark, Link2, MessageCircleQuestion, Plus, RefreshCw, Scale, Shuffle, Sparkles, X,
 } from 'lucide-react'
 
 import { ErrorState } from '@/components/common/ErrorState'
 import { LoadingState } from '@/components/common/LoadingState'
 import { BenchmarkChart } from '@/components/market/BenchmarkChart'
+import { AiBuildCard, BuildWithAI } from '@/components/market/BuildWithAI'
 import { ContributionBreakdown } from '@/components/market/ContributionBreakdown'
 import { CorrelationHeatmap, DiversificationSummary } from '@/components/market/DiversificationXRay'
+import { FutureRange } from '@/components/market/FutureRange'
 import { CountUp, Reveal, Segmented } from '@/components/market/motion'
 import { PortfolioCopilot, type CopilotQuestion } from '@/components/market/PortfolioCopilot'
+import { ShareDialog } from '@/components/market/ShareDialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAsync } from '@/hooks/useAsync'
 import { cn } from '@/lib/utils'
 import { getMarketAssets, getMarketInsights, getMarketPortfolio } from '@/services/market'
-import type { BenchmarkId, MarketAsset, MarketPortfolio, MarketRequest } from '@/types/market'
+import type { BenchmarkId, BuildResponse, MarketAsset, MarketPortfolio, MarketRequest } from '@/types/market'
 import { formatCurrency } from '@/utils/format'
+import { readSharedPortfolio, syncShareUrl } from '@/utils/share'
 
 type Weights = Record<string, number>
 type Days = 30 | 90 | 365
@@ -56,15 +60,26 @@ const toPercentWeights = (fractions: [string, number][]): Weights => {
 
 export function MarketPage() {
   const catalog = useAsync(getMarketAssets, [])
-  const [weights, setWeights] = useState<Weights>(PRESETS[0].weights)
-  const [investment, setInvestment] = useState(10000)
-  const [days, setDays] = useState<Days>(90)
-  const [applied, setApplied] = useState<MarketRequest>(() => toRequest(PRESETS[0].weights, 10000, 90))
+  // A shared link (?mix=…) opens exactly that portfolio; otherwise start from the crypto preset.
+  const [shared] = useState(() => readSharedPortfolio())
+  const [weights, setWeights] = useState<Weights>(shared?.weights ?? PRESETS[0].weights)
+  const [investment, setInvestment] = useState(shared?.investment ?? 10000)
+  const [days, setDays] = useState<Days>(shared?.days ?? 90)
+  const [applied, setApplied] = useState<MarketRequest>(
+    () => toRequest(shared?.weights ?? PRESETS[0].weights, shared?.investment ?? 10000, shared?.days ?? 90))
   const [revision, setRevision] = useState(0)
   const [formError, setFormError] = useState('')
-  const [benchmark, setBenchmark] = useState<BenchmarkId | null>()
+  const [benchmark, setBenchmark] = useState<BenchmarkId | null | undefined>(shared?.benchmark)
+  const [showSharedNote, setShowSharedNote] = useState(Boolean(shared))
+  const [aiBuild, setAiBuild] = useState<{ request: MarketRequest; goal: string; build: BuildResponse }>()
   const resultsRef = useRef<HTMLDivElement>(null)
   const stocksConfigured = Boolean(catalog.data?.stocks_configured)
+  const effectiveBenchmark = benchmark === undefined ? (stocksConfigured ? 'SPY' : 'BTC') : benchmark
+
+  // Keep the address bar pointing at the analyzed portfolio, so copying the URL shares it too.
+  useEffect(() => {
+    if (catalog.data) syncShareUrl(applied, effectiveBenchmark)
+  }, [applied, effectiveBenchmark, catalog.data])
 
   const total = Object.values(weights).reduce((sum, w) => sum + w, 0)
   const count = Object.keys(weights).length
@@ -87,10 +102,15 @@ export function MarketPage() {
   }
   const loadMix = (holdings: { symbol: string; weight: number }[]) => {
     const next = toPercentWeights(holdings.map(h => [h.symbol, h.weight]))
+    const request = toRequest(next, investment, days)
     setWeights(next)
     setFormError('')
-    run(toRequest(next, investment, days))
+    run(request)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+    return request
+  }
+  const onBuilt = (goal: string, build: BuildResponse) => {
+    setAiBuild({ request: loadMix(build.holdings), goal, build })
   }
 
   return (
@@ -109,6 +129,17 @@ export function MarketPage() {
           Pick real stocks, ETFs, and crypto. We backtest them on actual market prices, x-ray how diversified they
           really are, and an AI copilot explains it all in plain English. Practice mode: no real money moves.
         </p>
+        <AnimatePresence>
+          {showSharedNote && (
+            <motion.p initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, height: 0 }}
+              className="flex w-fit items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-sm">
+              <Link2 className="size-4 shrink-0 text-primary" aria-hidden /> You opened a shared portfolio. Tweak it and make it yours.
+              <button type="button" onClick={() => setShowSharedNote(false)} aria-label="Dismiss" className="ml-1 text-muted-foreground hover:text-foreground">
+                <X className="size-4" aria-hidden />
+              </button>
+            </motion.p>
+          )}
+        </AnimatePresence>
       </motion.header>
 
       <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-[370px_minmax(0,1fr)]">
@@ -122,6 +153,10 @@ export function MarketPage() {
               <CardDescription>Start from a preset or pick up to 12 assets.</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-5">
+              {catalog.data && <BuildWithAI investment={investment} days={days} onBuilt={onBuilt} />}
+              <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-widest text-muted-foreground" aria-hidden>
+                <span className="h-px flex-1 bg-white/[0.07]" />or build it yourself<span className="h-px flex-1 bg-white/[0.07]" />
+              </div>
               <div className="grid grid-cols-2 gap-2">
                 {PRESETS.map(({ label, weights: preset, stocks, Icon }) => (
                   <motion.button key={label} type="button" whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}
@@ -196,8 +231,8 @@ export function MarketPage() {
         <div ref={resultsRef} className="flex min-w-0 scroll-mt-24 flex-col gap-6 pb-20">
           {catalog.data
             ? <PortfolioReport key={revision} request={applied} stocksConfigured={stocksConfigured}
-                benchmark={benchmark === undefined ? (stocksConfigured ? 'SPY' : 'BTC') : benchmark}
-                onBenchmark={setBenchmark} onLoadMix={loadMix} />
+                benchmark={effectiveBenchmark} onBenchmark={setBenchmark} onLoadMix={loadMix}
+                aiBuild={aiBuild?.request === applied ? aiBuild : undefined} onDismissAi={() => setAiBuild(undefined)} />
             : <ReportSkeleton />}
         </div>
       </div>
@@ -300,10 +335,16 @@ function WeightEditor({ weights, onChange, total }: { weights: Weights; onChange
   )
 }
 
-function PortfolioReport({ request, ...rest }: {
-  request: MarketRequest; stocksConfigured: boolean; benchmark: BenchmarkId | null
-  onBenchmark: (id: BenchmarkId | null) => void; onLoadMix: (h: { symbol: string; weight: number }[]) => void
-}) {
+interface DashboardProps {
+  stocksConfigured: boolean
+  benchmark: BenchmarkId | null
+  onBenchmark: (id: BenchmarkId | null) => void
+  onLoadMix: (h: { symbol: string; weight: number }[]) => void
+  aiBuild: { goal: string; build: BuildResponse } | undefined
+  onDismissAi: () => void
+}
+
+function PortfolioReport({ request, ...rest }: DashboardProps & { request: MarketRequest }) {
   const report = useAsync(() => getMarketPortfolio(request), [request])
   if (report.loading) return <ReportSkeleton />
   if (report.error) return <ErrorState title="Market data is unavailable" error={report.error} onRetry={report.retry} className="min-h-80 rounded-2xl" />
@@ -321,10 +362,7 @@ function ReportSkeleton() {
   )
 }
 
-function Dashboard({ data, stocksConfigured, benchmark, onBenchmark, onLoadMix }: {
-  data: MarketPortfolio; stocksConfigured: boolean; benchmark: BenchmarkId | null
-  onBenchmark: (id: BenchmarkId | null) => void; onLoadMix: (h: { symbol: string; weight: number }[]) => void
-}) {
+function Dashboard({ data, stocksConfigured, benchmark, onBenchmark, onLoadMix, aiBuild, onDismissAi }: DashboardProps & { data: MarketPortfolio }) {
   const insights = useAsync(() => getMarketInsights(data.request, benchmark), [data.data_id, benchmark])
   const [copilotOpen, setCopilotOpen] = useState(false)
   const [question, setQuestion] = useState<CopilotQuestion>()
@@ -361,14 +399,18 @@ function Dashboard({ data, stocksConfigured, benchmark, onBenchmark, onLoadMix }
 
   return (
     <>
+      {aiBuild && <Reveal><AiBuildCard goal={aiBuild.goal} build={aiBuild.build} onDismiss={onDismissAi} /></Reveal>}
       <Reveal>
         <Card className="glow-card gap-0 overflow-hidden py-0">
           <div className="grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
             <div className="flex flex-col justify-center gap-2 border-b border-white/[0.06] p-6 sm:p-8 lg:border-r lg:border-b-0">
-              <p className="text-sm text-muted-foreground">
-                If you had invested <span className="font-medium text-foreground">{formatCurrency(data.initial_value)}</span> on{' '}
-                <span className="font-medium text-foreground">{longDate(data.start_date)}</span>
-              </p>
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-sm text-muted-foreground">
+                  If you had invested <span className="font-medium text-foreground">{formatCurrency(data.initial_value)}</span> on{' '}
+                  <span className="font-medium text-foreground">{longDate(data.start_date)}</span>
+                </p>
+                <ShareDialog portfolio={data} benchmark={benchmark} />
+              </div>
               <CountUp value={data.final_value} from={data.initial_value}
                 format={{ style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }}
                 className="text-5xl font-semibold tracking-tighter tabular-nums sm:text-6xl" />
@@ -423,6 +465,18 @@ function Dashboard({ data, stocksConfigured, benchmark, onBenchmark, onLoadMix }
               benchmarkLoading={insights.loading} selected={benchmark} onSelect={onBenchmark}
               stocksConfigured={stocksConfigured} totalReturn={data.total_return} />
           </CardContent>
+        </Card>
+      </Reveal>
+
+      <Reveal>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg tracking-tight">Where could it go from here?</CardTitle>
+            <CardDescription>
+              The range of outcomes for {formatCurrency(data.request.initial_investment)} invested today in this mix, based on its real volatility.
+            </CardDescription>
+          </CardHeader>
+          <CardContent><FutureRange portfolio={data} /></CardContent>
         </Card>
       </Reveal>
 

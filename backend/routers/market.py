@@ -9,15 +9,17 @@ from typing import Literal
 
 from backend.ai.models import Allocation, PortfolioAnalytics, PortfolioExplanation
 from backend.ai.explanations import create_fallback_explanation
+from backend.ai.builder import REASONS, BedrockPortfolioBuilder, fallback_build
 from backend.ai.chat import BedrockPortfolioChat, build_facts, fallback_reply, suggestions
 from backend.ai.provider import BedrockExplanationProvider, error_code
 from backend.models.market import (
-    ChatRequest, ChatResponse, InsightsRequest, MarketInsights, MarketPortfolio, MarketRequest, MarketTicker,
+    BuildRequest, BuildResponse, ChatRequest, ChatResponse, InsightsRequest, MarketInsights, MarketPortfolio,
+    MarketRequest, MarketTicker, Projection, ProjectionRequest,
 )
 from backend.services import ai_client
 from backend.services.market_data import assets, stock_credentials_configured, MarketDataError
 from backend.services.market_live import get_ticker
-from backend.services.market_insights import build_insights, insights_for, run_what_if
+from backend.services.market_insights import backtest_mix, build_insights, build_projection, insights_for, run_what_if
 from backend.services.market_portfolio import analyze_market_portfolio, load_market_portfolio
 
 router = APIRouter()
@@ -125,3 +127,40 @@ def chat(request: ChatRequest):
         logger.warning("Portfolio chat used fallback (%s).", error_code(error))
     return ChatResponse(data_id=portfolio.data_id, source="fallback",
                         reply=fallback_reply(request.messages[-1].content, facts), suggestions=hints)
+
+
+@router.post("/projection", response_model=Projection)
+def projection(request: ProjectionRequest):
+    try:
+        return build_projection(request)
+    except MarketDataError as error:
+        return _market_error(error)
+
+
+@router.post("/build", response_model=BuildResponse)
+def build(request: BuildRequest):
+    stocks = stock_credentials_configured()
+    available = [a for a in assets() if stocks or a.asset_class == "crypto"]
+
+    def run(holdings: list[dict]):
+        return backtest_mix(holdings, request.initial_investment, request.days)
+
+    try:
+        provider = ai_client._get_provider()
+        if isinstance(provider, BedrockExplanationProvider):
+            proposal, result, tested = BedrockPortfolioBuilder(provider.client, provider.model).build(
+                request.goal, available, request.initial_investment, request.days, run,
+            )
+            return BuildResponse(source="bedrock", result=result, tested=tested, **proposal)
+    except (BotoCoreError, ClientError, ValueError, KeyError, TypeError) as error:
+        logger.warning("Portfolio builder used fallback (%s).", error_code(error))
+    name, summary, mix = fallback_build(request.goal, stocks)
+    try:
+        result = run([{"symbol": s, "weight": w} for s, w in mix.items()])
+    except ValueError as error:
+        return _market_error(MarketDataError("build_unavailable", str(error)))
+    return BuildResponse(
+        source="fallback", name=name, summary=summary, result=result,
+        holdings=[{"symbol": h.symbol, "weight": h.weight, "reason": REASONS.get(h.symbol, "Adds variety to the mix")}
+                  for h in result.holdings],
+    )

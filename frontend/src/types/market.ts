@@ -113,3 +113,23 @@ export interface TickerQuote {
   spark: number[]
 }
 export interface MarketTicker { quotes: TickerQuote[]; fetched_at: string; stocks_included: boolean }
+export type ProjectionYears = 1 | 3 | 5 | 10
+export interface Projection {
+  data_id: string
+  start_value: number
+  annual_volatility: number
+  annual_return: number
+  years: number
+  volatility_window_days: number
+  probability_below_start: number
+  points: { month: number; p5: number; p25: number; p50: number; p75: number; p95: number }[]
+  notes: string[]
+}
+export interface BuildResponse {
+  source: 'bedrock' | 'fallback'
+  name: string
+  summary: string
+  holdings: { symbol: string; weight: number; reason: string }[]
+  result: WhatIfResult
+  tested: WhatIfResult[]
+}
