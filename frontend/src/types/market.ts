@@ -102,3 +102,14 @@ export interface ChatResponse {
   what_ifs: WhatIfResult[]
   suggestions: string[]
 }
+export interface TickerQuote {
+  symbol: string
+  name: string
+  asset_class: 'crypto' | 'stock' | 'bond'
+  price: number
+  change: number
+  as_of: string
+  live: boolean
+  spark: number[]
+}
+export interface MarketTicker { quotes: TickerQuote[]; fetched_at: string; stocks_included: boolean }

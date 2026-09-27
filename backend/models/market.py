@@ -162,3 +162,22 @@ class ChatResponse(BaseModel):
     reply: str
     what_ifs: list[WhatIfResult] = Field(default_factory=list)
     suggestions: list[str] = Field(default_factory=list)
+
+
+# --- Live ticker -----------------------------------------------------------------
+
+class TickerQuote(BaseModel):
+    symbol: str
+    name: str
+    asset_class: Literal["crypto", "stock", "bond"]
+    price: float
+    change: float  # versus the previous daily close
+    as_of: datetime
+    live: bool  # market open: always for crypto; stocks only with a trade in the last few minutes
+    spark: list[float] = Field(default_factory=list)  # recent daily closes, oldest first
+
+
+class MarketTicker(BaseModel):
+    quotes: list[TickerQuote]
+    fetched_at: datetime
+    stocks_included: bool

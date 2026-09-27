@@ -12,10 +12,11 @@ from backend.ai.explanations import create_fallback_explanation
 from backend.ai.chat import BedrockPortfolioChat, build_facts, fallback_reply, suggestions
 from backend.ai.provider import BedrockExplanationProvider, error_code
 from backend.models.market import (
-    ChatRequest, ChatResponse, InsightsRequest, MarketInsights, MarketPortfolio, MarketRequest,
+    ChatRequest, ChatResponse, InsightsRequest, MarketInsights, MarketPortfolio, MarketRequest, MarketTicker,
 )
 from backend.services import ai_client
 from backend.services.market_data import assets, stock_credentials_configured, MarketDataError
+from backend.services.market_live import get_ticker
 from backend.services.market_insights import build_insights, insights_for, run_what_if
 from backend.services.market_portfolio import analyze_market_portfolio, load_market_portfolio
 
@@ -43,6 +44,14 @@ def _market_error(error):
         status_code=error.status,
         content={"error": {"code": error.code, "message": error.message}},
     )
+
+
+@router.get("/ticker", response_model=MarketTicker)
+def ticker():
+    try:
+        return get_ticker()
+    except MarketDataError as error:
+        return _market_error(error)
 
 
 @router.post("/portfolio", response_model=MarketPortfolio)

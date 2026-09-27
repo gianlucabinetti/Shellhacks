@@ -1,24 +1,36 @@
 # Portfolio X-Ray — AWS + Alpaca
 
-An educational portfolio simulator with real historical market prices,
-fictional holdings, and Amazon Nova explanations through AWS Bedrock.
-No personal bank account, brokerage portfolio, or crypto wallet is connected.
+Backtest any mix of real stocks, ETFs, and crypto on **real Alpaca market
+data**, x-ray how diversified it really is, and ask an **AI copilot** (Amazon
+Nova on AWS Bedrock) to explain it or test what-ifs.
+
+**Real vs practice:** every price, chart, and return on the Markets screen
+comes from live Alpaca feeds. The portfolio itself is a practice backtest:
+no real money is invested, no trades are placed, and no bank, brokerage, or
+wallet is connected. The older quiz/dashboard demo still uses sample data.
 
 **Start here:** [Market data and crypto setup](MARKET_DATA_SETUP.md) ·
 [AWS setup](AWS_SETUP.md) · [Provider research](docs/DATA_SOURCES.md)
 
 ## What works
 
-- **Connected market screen:** search a catalog of crypto, stocks, and ETFs;
-  choose 1–12 assets; set weights; analyze a fictional starting amount.
+- **Live market ticker:** real Alpaca prices for BTC, ETH, SOL, XRP, DOGE,
+  SPY, AAPL, MSFT, and VTI with day change and 30-day sparklines, refreshed
+  every 30 seconds. Crypto trades 24/7; stocks are labelled *Closed* outside
+  market hours instead of pretending to be live.
+- **Market screen:** search a catalog of crypto, stocks, and ETFs; choose
+  1–12 assets; set weights with sliders; backtest a practice amount.
 - **Crypto without API keys:** Bitcoin, Ethereum, Solana, Avalanche, Chainlink,
   Dogecoin, Litecoin, Bitcoin Cash, Uniswap, Aave, Polkadot, and XRP.
 - **Stocks and ETFs:** VTI, VXUS, SPY, AAPL, MSFT, BND, and SGOV through Alpaca's
   IEX feed. Server-side Alpaca credentials are required for this part.
-- **Historical analysis:** 30-day, 90-day, and one-year periods; value chart,
-  period return, annualized volatility, and daily-observed drawdown.
-- **Honest data labels:** actual market prices, fictional holdings, source/feed,
-  date, fetch time, cache status, and calculation assumptions.
+- **Backtest results:** 1M, 3M, and 1Y look-backs; "if you had invested $X on
+  date Y it would be worth…", period return, annualized volatility, and worst
+  drop from a previous high.
+- **Replay:** a time-lapse that draws the portfolio (and benchmark) day by day
+  with a rolling value counter.
+- **Honest data labels:** real prices with source/feed, fetch time, and
+  calculation assumptions; practice money is labelled as such.
 - **AWS explanations:** Amazon Nova Lite through Bedrock in us-east-1.
   The UI clearly distinguishes AWS output from an offline template.
 - **Expandable catalog:** add provider-supported symbols in
@@ -32,19 +44,25 @@ No personal bank account, brokerage portfolio, or crypto wallet is connected.
   real prices; "Load this mix" applies one to the dashboard. With
   `AI_PROVIDER=fallback` it answers common questions deterministically.
 
+- **Modern, motion-driven UI:** Geist type, glass surfaces, spring animations
+  (`motion`), rolling numbers (`@number-flow/react`), and scroll reveals. All
+  motion respects the operating system's reduced-motion setting.
+
 New endpoints (new contracts; existing ones are unchanged):
 
 | Endpoint | Body | Returns |
 |---|---|---|
+| `GET /api/market/ticker` | — | latest price, day change, market-open flag, and 30-day closes per symbol (cached 20 s) |
 | `POST /api/market/insights` | `{portfolio: MarketRequest, benchmark: "SPY" \| "60_40" \| "BTC" \| null}` | correlation matrix, diversification, contributions, benchmark series |
 | `POST /api/market/chat` | `{portfolio, benchmark, messages: [{role, content}]}` (last message from the user) | `{source, reply, what_ifs, suggestions}` |
 
 Calculations live in `backend/analytics/insights.py`; prompts and the chat
-tool loop live in `backend/ai/chat.py`.
+tool loop live in `backend/ai/chat.py`; the ticker lives in
+`backend/services/market_live.py`.
 
 The new market screen is the default landing page and calls the backend.
-The earlier questionnaire and dashboard remain under **Original demo**, with
-their existing mock data. The new screen does not depend on that unfinished
+The earlier questionnaire and dashboard remain under **Learn** and the
+**Risk quiz** button in the header, with their existing sample data. The new screen does not depend on that unfinished
 legacy API adapter.
 
 ## Quick start
@@ -180,7 +198,7 @@ Legacy profiles: conservative, moderate, aggressive.
 
 ## Legacy demo settings
 
-Keep `VITE_USE_MOCKS=true` and `USE_MOCK_ANALYTICS=true` for **Original demo**.
+Keep `VITE_USE_MOCKS=true` and `USE_MOCK_ANALYTICS=true` for the legacy quiz/dashboard demo.
 Neither switch disables the new market screen or changes its Alpaca source.
 
 The original frontend service contracts still need an adapter if the team
