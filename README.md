@@ -7,7 +7,7 @@ Nova on AWS Bedrock) to explain it or test what-ifs.
 **Real vs practice:** every price, chart, and return on the Markets screen
 comes from live Alpaca feeds. The portfolio itself is a practice backtest:
 no real money is invested, no trades are placed, and no bank, brokerage, or
-wallet is connected. The older quiz/dashboard demo still uses sample data.
+wallet is connected.
 
 **Start here:** [Market data and crypto setup](MARKET_DATA_SETUP.md) ·
 [AWS setup](AWS_SETUP.md) · [Provider research](docs/DATA_SOURCES.md)
@@ -76,10 +76,14 @@ Calculations live in `backend/analytics/insights.py` and
 `backend/ai/chat.py` and `backend/ai/builder.py`; the ticker lives in
 `backend/services/market_live.py`.
 
-The new market screen is the default landing page and calls the backend.
-The earlier questionnaire and dashboard remain under **Learn** and the
-**Risk quiz** button in the header, with their existing sample data. The new screen does not depend on that unfinished
-legacy API adapter.
+The app has two screens: **Markets** (the default) and **Risk quiz**. The quiz
+is scored by the backend's deterministic scorer (`POST /api/risk/assess`), so
+the result depends on the answers: loss tolerance combines the "largest loss",
+"20% drop", and "steady vs swings" answers (the first counts double). Its
+stock/bond/cash split becomes real funds (stocks 70% VTI / 30% VXUS, bonds
+BND, cash SGOV) and **See it on real market prices** loads that mix into the
+Markets dashboard with a 1-year backtest. The older Learn page and mock
+dashboard were removed.
 
 ## Quick start
 
@@ -123,20 +127,40 @@ For remote AWS editor forwarding and CORS, see [AWS_SETUP.md](AWS_SETUP.md).
 
 ### Demo on phones
 
-Share links and QR codes only work on other devices if they can reach this
-computer. For a live demo on the same Wi-Fi:
+A QR code made on `http://localhost:5173` can't work on a phone: `localhost`
+means "this device", so the phone looks for the app on itself. The laptop has
+to be reachable from the phone.
+
+**Campus, hackathon, or public Wi-Fi (recommended): use a tunnel.** These
+networks usually block devices from reaching each other, so the Wi-Fi option
+below will not work there. A Cloudflare quick tunnel gives a public `https`
+address that works on any network, including phone data. Install
+[`cloudflared`](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/)
+once (Windows: `winget install --id Cloudflare.cloudflared`), keep the backend
+and `npm run dev` running, then in another terminal:
 
 ```bash
 cd frontend
-npm run dev:lan
+npm run tunnel
 ```
 
-Open the **Network** address Vite prints (for example
-`http://192.168.1.5:5173`) on the laptop, then use **Share**. The QR code now
-points at that address. Phones load the app from the laptop, and the Vite dev
-server forwards `/api` calls to the backend on port 8000, so no CORS or
-backend host changes are needed. Windows may ask to allow Node.js through the
-firewall the first time; allow it on private networks only.
+Open the `https://….trycloudflare.com` address it prints on the laptop and use
+**Share**; the QR code now points at that address. The address changes each
+time the tunnel restarts, and anyone with it can use the app while it runs
+(including AI features billed to your AWS account), so stop it (Ctrl+C) after
+the demo. The script forces `--protocol http2` because campus networks such as
+FIU's block the QUIC (UDP) connection `cloudflared` tries first; HTTP/2 uses
+ordinary HTTPS and gets through. Open a new terminal after installing so
+`cloudflared` is on the PATH.
+
+**Home Wi-Fi or a phone hotspot:** run `npm run dev:lan` instead, open the
+**Network** address Vite prints (for example `http://192.168.1.5:5173`), and
+share from there. Windows may ask to allow Node.js through the firewall; allow
+it on private networks only.
+
+Either way, phones load the app through the laptop and the Vite dev server
+forwards `/api` calls to the backend on port 8000, so no CORS or backend host
+changes are needed.
 
 ## Enable stocks and ETFs
 
@@ -221,7 +245,7 @@ Interactive docs: [localhost:8000/docs](http://localhost:8000/docs).
 | POST | `/api/market/portfolio` | Real-price, hypothetical portfolio calculation. |
 | POST | `/api/market/explain` | Explanation with AWS/template source and calculation ID. |
 | GET | `/api/health` | Backend liveness. |
-| POST | `/api/risk/assess` | Legacy deterministic risk scoring. |
+| POST | `/api/risk/assess` | Deterministic risk scoring used by the Risk quiz. |
 | GET | `/api/portfolio/{profile}` | Legacy portfolio fixtures or external analytics hook. |
 | POST | `/api/ai/explain` | Legacy profile explanation. |
 | GET | `/api/dashboard/{profile}` | Legacy portfolio and explanation. |
@@ -229,20 +253,14 @@ Interactive docs: [localhost:8000/docs](http://localhost:8000/docs).
 
 Legacy profiles: conservative, moderate, aggressive.
 
-## Legacy demo settings
+## Legacy backend settings
 
-Keep `VITE_USE_MOCKS=true` and `USE_MOCK_ANALYTICS=true` for the legacy quiz/dashboard demo.
-Neither switch disables the new market screen or changes its Alpaca source.
-
-The original frontend service contracts still need an adapter if the team
-wants the questionnaire and old dashboard fully connected. Its
-`/api/portfolios/*` and camelCase fields differ from the legacy backend.
-The old non-mock path imports `analytics.engine.analyze_portfolio(profile)`,
-which is not included. Do not turn that flag off merely to enable Alpaca.
-
-The legacy AI `experience` parameter remains accepted but is not yet threaded
-into its prompt. The new market explanation describes the selected asset mix
-and calculated figures.
+The frontend no longer uses mock data or `VITE_USE_MOCKS`. The legacy backend
+routes (`/api/portfolio`, `/api/dashboard`, `/api/ai/explain`) are unchanged
+for teammates; keep `USE_MOCK_ANALYTICS=true` for them, since their non-mock
+path imports `analytics.engine.analyze_portfolio(profile)`, which is not
+included. The legacy AI `experience` parameter is accepted but not yet threaded
+into its prompt.
 
 ## Code map
 
@@ -251,6 +269,7 @@ and calculated figures.
 - `backend/services/market_portfolio.py`: actual portfolio calculations.
 - `backend/routers/market.py`: connected market and explanation endpoints.
 - `frontend/src/pages/MarketPage.tsx`: asset selection, charts, and explanations.
+- `frontend/src/pages/QuizPage.tsx`, `ResultPage.tsx`, `services/riskQuiz.ts`: the risk quiz and its backend scoring.
 - `backend/ai/provider.py`: Amazon Nova structured generation.
 - `scripts/check_market_data.py` and `scripts/check_bedrock.py`: live checks.
 - `backend/tests/`: backend/provider/analytics tests.

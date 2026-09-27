@@ -1,65 +1,50 @@
 import { useState } from 'react'
 
 import { AppShell } from '@/components/layout/AppShell'
-import { DashboardPage } from '@/pages/DashboardPage'
+import { MarketPage, type MarketPreset } from '@/pages/MarketPage'
 import { QuizPage } from '@/pages/QuizPage'
 import { ResultPage } from '@/pages/ResultPage'
-import { WelcomePage } from '@/pages/WelcomePage'
-import { MarketPage } from '@/pages/MarketPage'
-import type { RiskAssessmentResult, RiskProfile } from '@/types/api'
+import type { QuizResult } from '@/services/riskQuiz'
+import { RISK_PROFILE_META } from '@/utils/riskProfiles'
 
 /**
- * The demo flow is linear, so a small step machine replaces a router:
- * welcome → quiz → result → dashboard (where the risk profile can be changed).
+ * A small step machine instead of a router: markets (home) ⇄ quiz → result → markets with
+ * the quiz's example portfolio loaded on real prices.
  */
 type Step =
-  | { name: 'markets' }
-  | { name: 'welcome' }
+  | { name: 'markets'; preset?: MarketPreset }
   | { name: 'quiz' }
-  | { name: 'result'; assessment: RiskAssessmentResult }
-  | { name: 'dashboard'; riskProfile: RiskProfile }
+  | { name: 'result'; result: QuizResult }
 
 export default function App() {
   const [step, setStep] = useState<Step>({ name: 'markets' })
 
   const go = (next: Step) => {
+    // The address bar carries the Markets portfolio; clear it elsewhere so a reload or shared link stays accurate.
+    if (next.name !== 'markets' && window.location.search) window.history.replaceState(null, '', window.location.pathname)
     setStep(next)
     window.scrollTo({ top: 0 })
   }
 
   return (
     <AppShell
-      onHome={() => go({ name: 'welcome' })}
+      section={step.name === 'markets' ? 'markets' : 'quiz'}
       onMarkets={() => go({ name: 'markets' })}
-      onStartAssessment={() => go({ name: 'quiz' })}
-      marketsActive={step.name === 'markets'}
-      landingActive={step.name === 'welcome'}
+      onQuiz={() => go({ name: 'quiz' })}
       wide={step.name === 'markets'}
     >
-      {step.name === 'markets' && <MarketPage />}
-      {step.name === 'welcome' && (
-        <WelcomePage onStart={() => go({ name: 'quiz' })} onExploreDemo={() => go({ name: 'markets' })} />
-      )}
-
-      {step.name === 'quiz' && (
-        <QuizPage onComplete={(assessment) => go({ name: 'result', assessment })} />
-      )}
-
+      {step.name === 'markets' && <MarketPage key={step.preset?.label ?? 'home'} preset={step.preset} />}
+      {step.name === 'quiz' && <QuizPage onComplete={result => go({ name: 'result', result })} />}
       {step.name === 'result' && (
         <ResultPage
-          result={step.assessment}
+          result={step.result}
           onRetake={() => go({ name: 'quiz' })}
-          onContinue={() => go({ name: 'dashboard', riskProfile: step.assessment.riskProfile })}
-        />
-      )}
-
-      {step.name === 'dashboard' && (
-        <DashboardPage
-          riskProfile={step.riskProfile}
-          onRiskProfileChange={(riskProfile) => setStep({ name: 'dashboard', riskProfile })}
+          onContinue={mix => go({
+            name: 'markets',
+            preset: { weights: mix, label: `${RISK_PROFILE_META[step.result.profile].name} profile from your risk quiz` },
+          })}
         />
       )}
     </AppShell>
   )
 }
-

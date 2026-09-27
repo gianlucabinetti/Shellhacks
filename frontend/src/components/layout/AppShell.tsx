@@ -1,29 +1,26 @@
 import { useState } from 'react'
 import { AnimatePresence, MotionConfig, motion } from 'motion/react'
-import { ArrowRight, Menu, ScanLine, X } from 'lucide-react'
+import { Menu, ScanLine, ShieldCheck, X } from 'lucide-react'
 
 import { Disclaimer } from '@/components/common/Disclaimer'
 import { LiveTicker } from '@/components/market/LiveTicker'
 import { cn } from '@/lib/utils'
-import { USE_MOCKS } from '@/services/api'
 
 interface AppShellProps {
-  onHome: () => void
+  section: 'markets' | 'quiz'
   onMarkets: () => void
-  onStartAssessment: () => void
-  marketsActive: boolean
-  landingActive: boolean
+  onQuiz: () => void
   /** Wider content area for dense dashboard screens. */
   wide?: boolean
   children: React.ReactNode
 }
 
-export function AppShell({ onHome, onMarkets, onStartAssessment, marketsActive, landingActive, wide = false, children }: AppShellProps) {
+export function AppShell({ section, onMarkets, onQuiz, wide = false, children }: AppShellProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const closeMenu = () => setMenuOpen(false)
   const nav = [
-    { label: 'Markets', active: marketsActive, onClick: onMarkets },
-    { label: 'Learn', active: !marketsActive, onClick: onHome },
+    { label: 'Markets', active: section === 'markets', onClick: onMarkets },
+    { label: 'Risk quiz', active: section === 'quiz', onClick: onQuiz },
   ]
 
   return (
@@ -55,13 +52,9 @@ export function AppShell({ onHome, onMarkets, onStartAssessment, marketsActive, 
               ))}
             </nav>
 
-            <div className="hidden items-center gap-3 md:flex">
-              {USE_MOCKS && !marketsActive && !landingActive && <span className="rounded-full border border-white/10 px-2.5 py-1 text-[0.65rem] text-muted-foreground">Sample data</span>}
-              <button type="button" onClick={onStartAssessment}
-                className="inline-flex h-9 items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 text-sm font-medium transition hover:bg-white/[0.09] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
-                Risk quiz <ArrowRight className="size-4" aria-hidden />
-              </button>
-            </div>
+            <span className="hidden items-center gap-1.5 rounded-full border border-white/[0.07] px-3 py-1.5 text-xs text-muted-foreground md:flex">
+              <ShieldCheck className="size-3.5 text-primary" aria-hidden /> Practice mode · no real money
+            </span>
 
             <button
               type="button"
@@ -86,10 +79,9 @@ export function AppShell({ onHome, onMarkets, onStartAssessment, marketsActive, 
                       {item.label}
                     </button>
                   ))}
-                  <button type="button" onClick={() => { onStartAssessment(); closeMenu() }}
-                    className="mt-2 flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-3 text-sm font-semibold text-primary-foreground">
-                    Take the risk quiz <ArrowRight className="size-4" aria-hidden />
-                  </button>
+                  <p className="flex items-center gap-1.5 px-3 pt-2 text-xs text-muted-foreground">
+                    <ShieldCheck className="size-3.5 text-primary" aria-hidden /> Practice mode · no real money
+                  </p>
                 </div>
               </motion.nav>
             )}

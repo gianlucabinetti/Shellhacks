@@ -63,8 +63,9 @@ export function ShareDialog({ portfolio, benchmark }: { portfolio: MarketPortfol
           <p className="flex gap-2 rounded-xl border border-amber-300/20 bg-amber-400/[0.07] p-3 text-xs leading-5 text-amber-100">
             <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
             <span>
-              Phones can't open <code>localhost</code>. Run <code>npm run dev:lan</code>, open the <strong>Network</strong> address
-              it prints on this computer, then share again. Phones must be on the same Wi-Fi.
+              This QR points at <code>localhost</code>, which only exists on this computer, so phones can't open it.
+              Run <code>npm run tunnel</code> in <code>frontend/</code>, open the <strong>https://…trycloudflare.com</strong> address it
+              prints, and share from there. That works on any network, including campus Wi-Fi.
             </span>
           </p>
         )}

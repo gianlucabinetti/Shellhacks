@@ -58,19 +58,24 @@ const toPercentWeights = (fractions: [string, number][]): Weights => {
   return next
 }
 
-export function MarketPage() {
+export interface MarketPreset { weights: Weights; label: string }
+
+export function MarketPage({ preset }: { preset?: MarketPreset }) {
   const catalog = useAsync(getMarketAssets, [])
-  // A shared link (?mix=…) opens exactly that portfolio; otherwise start from the crypto preset.
-  const [shared] = useState(() => readSharedPortfolio())
-  const [weights, setWeights] = useState<Weights>(shared?.weights ?? PRESETS[0].weights)
+  // Start from the quiz's portfolio, else a shared link (?mix=…), else the crypto preset.
+  const [shared] = useState(() => preset ? undefined : readSharedPortfolio())
+  const startWeights = preset?.weights ?? shared?.weights ?? PRESETS[0].weights
+  const startDays: Days = preset ? 365 : shared?.days ?? 90
+  const [weights, setWeights] = useState<Weights>(startWeights)
   const [investment, setInvestment] = useState(shared?.investment ?? 10000)
-  const [days, setDays] = useState<Days>(shared?.days ?? 90)
-  const [applied, setApplied] = useState<MarketRequest>(
-    () => toRequest(shared?.weights ?? PRESETS[0].weights, shared?.investment ?? 10000, shared?.days ?? 90))
+  const [days, setDays] = useState<Days>(startDays)
+  const [applied, setApplied] = useState<MarketRequest>(() => toRequest(startWeights, shared?.investment ?? 10000, startDays))
   const [revision, setRevision] = useState(0)
   const [formError, setFormError] = useState('')
   const [benchmark, setBenchmark] = useState<BenchmarkId | null | undefined>(shared?.benchmark)
-  const [showSharedNote, setShowSharedNote] = useState(Boolean(shared))
+  const [note, setNote] = useState(
+    preset ? `Loaded your ${preset.label}, backtested over the last year on real prices.`
+      : shared ? 'You opened a shared portfolio. Tweak it and make it yours.' : '')
   const [aiBuild, setAiBuild] = useState<{ request: MarketRequest; goal: string; build: BuildResponse }>()
   const resultsRef = useRef<HTMLDivElement>(null)
   const stocksConfigured = Boolean(catalog.data?.stocks_configured)
@@ -130,11 +135,11 @@ export function MarketPage() {
           really are, and an AI copilot explains it all in plain English. Practice mode: no real money moves.
         </p>
         <AnimatePresence>
-          {showSharedNote && (
+          {note && (
             <motion.p initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, height: 0 }}
               className="flex w-fit items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-sm">
-              <Link2 className="size-4 shrink-0 text-primary" aria-hidden /> You opened a shared portfolio. Tweak it and make it yours.
-              <button type="button" onClick={() => setShowSharedNote(false)} aria-label="Dismiss" className="ml-1 text-muted-foreground hover:text-foreground">
+              <Link2 className="size-4 shrink-0 text-primary" aria-hidden /> {note}
+              <button type="button" onClick={() => setNote('')} aria-label="Dismiss" className="ml-1 text-muted-foreground hover:text-foreground">
                 <X className="size-4" aria-hidden />
               </button>
             </motion.p>
