@@ -1,6 +1,7 @@
 """One live Alpaca check. No account or order APIs; no fixture fallback."""
 import argparse
 
+import backend.config  # noqa: F401  loads the project-root .env, as the API server does
 from backend.models.market import MarketRequest
 from backend.services.market_data import MarketDataError
 from backend.services.market_portfolio import analyze_market_portfolio
