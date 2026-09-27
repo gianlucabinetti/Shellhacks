@@ -73,6 +73,8 @@ REASONS = {
     "MSFT": "A single large tech company: more upside and more risk than a fund",
     "BND": "Bonds tend to fall less than stocks and cushion drops",
     "SGOV": "Short-term US Treasuries: very steady, close to cash",
+    "GLD": "Gold: often holds up when stocks fall, but pays no income",
+    "SLV": "Silver: moves with gold but swings harder",
     "BTC/USD": "The largest crypto: extra growth potential with big swings",
     "ETH/USD": "The second-largest crypto, often moving with Bitcoin",
     "SOL/USD": "A smaller, faster-moving crypto: the highest-risk slice",
