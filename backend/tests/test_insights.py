@@ -125,6 +125,23 @@ def test_insights_endpoint_with_benchmark(client):
         portfolio["final_value"] - portfolio["initial_value"])
 
 
+def test_insights_include_exposure_by_type_and_sector(client):
+    mix = {"holdings": [{"symbol": "VTI", "weight": 0.5}, {"symbol": "AAPL", "weight": 0.3},
+                        {"symbol": "BND", "weight": 0.1}, {"symbol": "BTC/USD", "weight": 0.1}], "days": 30}
+    exposure = client.post("/api/market/insights", json={"portfolio": mix}).json()["exposure"]
+    portfolio = client.post("/api/market/portfolio", json=mix).json()
+    assert {t["label"] for t in exposure["by_type"]} == {"Stock index funds", "Individual stocks", "Bonds", "Crypto"}
+    assert sum(t["value"] for t in exposure["by_type"]) == pytest.approx(portfolio["final_value"])
+    shares = exposure["by_sector"] + exposure["outside_companies"]
+    assert sum(s["weight"] for s in shares) == pytest.approx(1)
+    tech = exposure["by_sector"][0]
+    assert tech["label"] == "Technology" and {h["symbol"] for h in tech["holdings"]} == {"AAPL", "VTI"}
+    assert tech["market_weight"] == pytest.approx(exposure["company_weight"] * 36.68 / 100.01)
+    assert {o["label"] for o in exposure["outside_companies"]} == {"Bonds", "Crypto"}
+    assert exposure["as_of"] == "2026-08-31"
+    assert exposure["message"].startswith("Technology is your largest sector")
+
+
 def test_unavailable_benchmark_does_not_fail_the_insights(client, monkeypatch):
     def crypto_only(selected, days, today=None):
         if any(a.asset_class != "crypto" for a in selected):
@@ -186,6 +203,7 @@ def ask(client, question, **extra):
     ("Why is my diversification score low?", "diversification score"),
     ("How did I do against the benchmark?", "Bitcoin only"),
     ("Which holding drove most of my result?", "contributed the most"),
+    ("Am I too concentrated in one sector?", "no sector exposure"),
     ("What if I moved 30% into bonds?", "What-if questions need the AI"),
     ("hello", "Ask about"),
 ])

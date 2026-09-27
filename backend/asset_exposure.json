@@ -1,0 +1,78 @@
+{
+  "source": "Fund sector weights and company sectors from stockanalysis.com (holdings data by Finnhub), retrieved 2026-09-27.",
+  "market_reference": {
+    "symbol": "VTI",
+    "name": "the whole US stock market (VTI)"
+  },
+  "types": {
+    "VTI": "stock_fund",
+    "VXUS": "stock_fund",
+    "SPY": "stock_fund",
+    "AAPL": "stock",
+    "MSFT": "stock",
+    "GLD": "metal",
+    "SLV": "metal",
+    "BND": "bond",
+    "SGOV": "bond"
+  },
+  "sectors": {
+    "VTI": {
+      "as_of": "2026-08-31",
+      "weights": {
+        "Technology": 36.68,
+        "Financials": 12.28,
+        "Health care": 9.81,
+        "Consumer discretionary": 9.23,
+        "Industrials": 9.07,
+        "Communication services": 8.86,
+        "Consumer staples": 4.28,
+        "Energy": 3.72,
+        "Real estate": 2.2,
+        "Utilities": 1.99,
+        "Materials": 1.89
+      }
+    },
+    "VXUS": {
+      "as_of": "2026-08-31",
+      "weights": {
+        "Financials": 23.98,
+        "Technology": 20.74,
+        "Industrials": 14.77,
+        "Consumer discretionary": 7.84,
+        "Materials": 7.51,
+        "Health care": 6.92,
+        "Energy": 4.91,
+        "Consumer staples": 4.62,
+        "Communication services": 3.99,
+        "Utilities": 2.81,
+        "Real estate": 1.92
+      }
+    },
+    "SPY": {
+      "as_of": "2026-09-25",
+      "weights": {
+        "Technology": 39.95,
+        "Financials": 11.33,
+        "Communication services": 10.09,
+        "Health care": 9.28,
+        "Consumer discretionary": 8.8,
+        "Industrials": 7.61,
+        "Consumer staples": 4.37,
+        "Energy": 3.41,
+        "Utilities": 1.89,
+        "Real estate": 1.7,
+        "Materials": 1.57
+      }
+    },
+    "AAPL": {
+      "weights": {
+        "Technology": 100
+      }
+    },
+    "MSFT": {
+      "weights": {
+        "Technology": 100
+      }
+    }
+  }
+}

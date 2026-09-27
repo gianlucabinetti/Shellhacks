@@ -1,6 +1,12 @@
-"""Benchmark comparison, correlation, and diversification for a market portfolio."""
+"""Benchmark comparison, correlation, diversification, and exposure for a market portfolio."""
+import json
+from datetime import date
+from functools import cache
+from pathlib import Path
+
 from pydantic import ValidationError
 
+from backend.analytics.exposure import by_sector, by_type, market_mix
 from backend.analytics.projection import probability_below, project_range
 from backend.analytics.insights import (
     aligned_returns,
@@ -16,6 +22,7 @@ from backend.models.market import (
     BenchmarkId,
     CorrelationMatrix,
     Diversification,
+    Exposure,
     MarketInsights,
     MarketPortfolio,
     MarketRequest,
@@ -56,7 +63,60 @@ def insights_for(portfolio: MarketPortfolio, history: dict, benchmark: Benchmark
             portfolio.initial_value, [p.model_dump() for p in portfolio.positions],
         )],
         benchmark=compare_benchmark(benchmark, portfolio) if benchmark else None,
+        exposure=build_exposure(portfolio),
     )
+
+
+@cache
+def exposure_data() -> dict:
+    return json.loads((Path(__file__).resolve().parents[1] / "asset_exposure.json").read_text(encoding="utf-8"))
+
+
+def build_exposure(portfolio: MarketPortfolio) -> Exposure:
+    """Ending values by asset type and by sector, looking through funds to the companies they hold."""
+    data = exposure_data()
+    values = {p.symbol: p.end_value for p in portfolio.positions}
+    types = {p.symbol: data["types"].get(p.symbol, p.asset_class) for p in portfolio.positions}
+    weights = {symbol: entry["weights"] for symbol, entry in data["sectors"].items()}
+    sectors, outside = by_sector(values, types, weights)
+    company = sum(s["weight"] for s in sectors)
+    reference = data["market_reference"]
+    matched = market_mix(company, weights[reference["symbol"]])
+    for s in sectors:
+        s["market_weight"] = matched.get(s["id"], 0.0)
+    dates = [date.fromisoformat(data["sectors"][s]["as_of"]) for s in values
+             if "as_of" in data["sectors"].get(s, {})]
+    return Exposure(
+        by_type=by_type(values, types), by_sector=sectors, outside_companies=outside, company_weight=company,
+        reference_name=reference["name"], as_of=min(dates, default=None), source=data["source"],
+        message=exposure_message(sectors, outside, company, matched, reference["name"]),
+    )
+
+
+def _join(labels: list[str]) -> str:
+    return labels[0] if len(labels) == 1 else ", ".join(labels[:-1]) + " and " + labels[-1]
+
+
+def exposure_message(sectors: list[dict], outside: list[dict], company: float,
+                     matched: dict[str, float], reference_name: str) -> str:
+    kinds = _join([o["label"].lower() for o in outside]) if outside else ""
+    if not sectors:
+        return f"None of this money is in companies, so it has no sector exposure. It is all in {kinds}."
+    top = sectors[0]
+    share = top["weight"] / company
+    market = matched.get(top["id"], 0.0) / company
+    text = f"{top['label']} is your largest sector: {share:.0%} of the money you have in companies."
+    if market > 0:
+        if share / market >= 1.2:
+            text += (f" In {reference_name} it is {market:.0%}, so a slump in {top['label'].lower()} "
+                     "would hit you harder than the market.")
+        elif share / market <= 0.8:
+            text += f" In {reference_name} it is {market:.0%}, so you hold less of it than the market does."
+        else:
+            text += f" That is close to {reference_name} ({market:.0%})."
+    if outside:
+        text += f" The other {1 - company:.0%} is in {kinds}, which are not companies and have no sector."
+    return text
 
 
 def diversification_message(stats: dict, assets: int) -> str:

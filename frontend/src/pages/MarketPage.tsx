@@ -10,6 +10,7 @@ import { BenchmarkChart } from '@/components/market/BenchmarkChart'
 import { AiBuildCard, BuildWithAI } from '@/components/market/BuildWithAI'
 import { ContributionBreakdown } from '@/components/market/ContributionBreakdown'
 import { CorrelationHeatmap, DiversificationSummary } from '@/components/market/DiversificationXRay'
+import { ExposureBreakdown } from '@/components/market/ExposureBreakdown'
 import { FutureRange } from '@/components/market/FutureRange'
 import { CountUp, Reveal, Segmented } from '@/components/market/motion'
 import { PortfolioCopilot, type CopilotQuestion } from '@/components/market/PortfolioCopilot'
@@ -512,6 +513,23 @@ function Dashboard({ data, stocksConfigured, benchmark, onBenchmark, onLoadMix, 
             </Card>
           </Reveal>
         </div>
+        {!(insights.error && !current) && (
+          <Reveal>
+            <Card>
+              <CardHeader>
+                <CardTitle className="tracking-tight">What you actually own</CardTitle>
+                <CardDescription>Your money by sector and by type. Funds are split into the sectors of the companies they hold.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {current?.exposure
+                  ? <ExposureBreakdown data={current.exposure} endDate={longDate(data.end_date)} onAsk={ask} />
+                  : current
+                    ? <p className="py-10 text-center text-sm text-muted-foreground">The sector breakdown is not available right now.</p>
+                    : <LoadingState className="h-64" label="Looking inside your funds" />}
+              </CardContent>
+            </Card>
+          </Reveal>
+        )}
       </section>
 
       <Reveal>
@@ -545,6 +563,7 @@ function Dashboard({ data, stocksConfigured, benchmark, onBenchmark, onLoadMix, 
           {data.notes.map(note => <li key={note}>{note}</li>)}
           <li>Diversification uses the diversification ratio (weighted average asset volatility ÷ portfolio volatility). Its square estimates the number of independent bets; the score is 100 × (1 − 1 / bets). Correlations use only days when every holding has a real closing price.</li>
           <li>Benchmarks are calculated the same way as your portfolio and rescaled to your portfolio's value on the first shared date.</li>
+          <li>Sector exposure uses each holding's ending value. A fund's value is split by its published sector weights (a dated snapshot, which drifts over time); individual stocks count fully toward their own sector. Bonds, gold and silver, and crypto are not companies, so they have no sector.</li>
         </ul>
       </details>
 

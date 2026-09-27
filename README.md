@@ -236,8 +236,8 @@ prices. Model failures may use a template, which the market screen labels.
 
 ## Verification
 
-- **143 backend tests passed:** routes, Bedrock tool loops (stubbed),
-  portfolio, insight, and projection calculations, crypto/equity calendars,
+- **154 backend tests passed:** routes, Bedrock tool loops (stubbed),
+  portfolio, insight, sector-exposure, and projection calculations, crypto/equity calendars,
   pagination, cache expiry, missing prices, and API errors.
 - **Frontend type check, production build, and lint passed.**
 - **Live checks passed (Sept 27, 2026):** all 12 catalog coins returned

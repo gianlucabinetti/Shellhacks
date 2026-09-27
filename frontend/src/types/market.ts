@@ -59,6 +59,26 @@ export interface MarketExplanation {
 
 export type BenchmarkId = 'SPY' | '60_40' | 'BTC'
 export interface CorrelationPair { a: string; b: string; correlation: number }
+export interface ExposureSlice {
+  id: string
+  label: string
+  /** Share of the portfolio's ending value. */
+  weight: number
+  value: number
+  holdings: { symbol: string; value: number }[]
+  /** Sectors only: this sector's share if the money in companies followed the reference market. */
+  market_weight: number | null
+}
+export interface MarketExposure {
+  by_type: ExposureSlice[]
+  by_sector: ExposureSlice[]
+  outside_companies: ExposureSlice[]
+  company_weight: number
+  reference_name: string
+  as_of: string | null
+  source: string
+  message: string
+}
 export interface MarketInsights {
   data_id: string
   correlation: { symbols: string[]; matrix: (number | null)[][]; observations: number }
@@ -85,6 +105,7 @@ export interface MarketInsights {
     max_drawdown: number | null
     excess_return: number | null
   } | null
+  exposure?: MarketExposure | null
 }
 export interface ChatMessage { role: 'user' | 'assistant'; content: string }
 export interface WhatIfResult {

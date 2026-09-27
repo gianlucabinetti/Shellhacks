@@ -74,6 +74,7 @@ def build_facts(portfolio: MarketPortfolio, insights: MarketInsights, history: d
     contributions = {c.symbol: c for c in insights.contributions}
     d = insights.diversification
     b = insights.benchmark
+    e = insights.exposure
     return {
         "start": str(portfolio.start_date), "end": str(portfolio.end_date),
         "initial_value": portfolio.initial_value, "final_value": portfolio.final_value,
@@ -94,6 +95,12 @@ def build_facts(portfolio: MarketPortfolio, insights: MarketInsights, history: d
             "name": b.name, "total_return": b.total_return, "volatility": b.annualized_volatility,
             "max_drawdown": b.max_drawdown, "excess_return": b.excess_return,
         } or None,
+        "exposure": e and {
+            "by_type": [(s.label, s.weight) for s in e.by_type],
+            "by_sector": [(s.label, s.weight) for s in e.by_sector],
+            "outside": [(s.label, s.weight) for s in e.outside_companies],
+            "message": e.message, "as_of": e.as_of and str(e.as_of),
+        },
     }
 
 
@@ -121,6 +128,16 @@ def facts_text(f: dict) -> str:
                  if d["average_correlation"] is not None else
                  f"Diversification score {d['score']}/100 ({d['label']}).")
     lines.append(d["message"])
+    if f.get("exposure"):
+        e = f["exposure"]
+        lines.append("Mix by type (ending values): " + ", ".join(f"{label} {pct(w)}" for label, w in e["by_type"]) + ".")
+        if e["by_sector"]:
+            lines.append("Sectors, with funds split by the companies they hold"
+                         + (f" (fund data as of {e['as_of']})" if e["as_of"] else "") + ": "
+                         + ", ".join(f"{label} {pct(w)}" for label, w in e["by_sector"]) + ".")
+        if e["outside"]:
+            lines.append("Not in companies (no sector): " + ", ".join(f"{label} {pct(w)}" for label, w in e["outside"]) + ".")
+        lines.append(e["message"])
     if f["benchmark"]:
         b = f["benchmark"]
         lines.append(f"Benchmark {b['name']}: return {pct(b['total_return'], True)}, volatility {pct(b['volatility'])}, "
@@ -259,6 +276,14 @@ def fallback_reply(question: str, f: dict) -> str:
             if len(moves) > 1 and all(m < 0 for m in moves.values()):
                 text += " Every holding fell at the same time, which is what high correlation looks like in practice."
         return text + " The price data shows when values fell, not the news behind it."
+    if has("sector", "industr", "exposure", "concentrat", "tech", "health", "medical", "types of", "what do i own", "made of"):
+        e = f.get("exposure")
+        if not e:
+            return "The sector breakdown is not available for this portfolio right now."
+        text = f"By type, this portfolio is {', '.join(f'{label} {pct(w)}' for label, w in e['by_type'])}. {e['message']}"
+        if e["as_of"]:
+            text += f" Funds are split into sectors using their holdings as of {e['as_of']}."
+        return text
     if has("diversif", "correlat", "together", "spread", "score"):
         return (f"Your diversification score is {d['score']}/100 ({d['label'].lower()}). {d['message']} "
                 "Correlation runs from -1 to 1; assets near 1 tend to rise and fall on the same days, "
@@ -287,4 +312,4 @@ def fallback_reply(question: str, f: dict) -> str:
     return (f"From {f['start']} to {f['end']}, this fictional {money(f['initial_value'])} portfolio became "
             f"{money(f['final_value'])} ({pct(f['total_return'], True)}), with {pct(f['volatility'])} annualized "
             f"volatility and a largest decline of {pct(abs(f['max_drawdown']))}. Ask about its drawdown, "
-            "diversification, biggest contributor, or benchmark comparison.")
+            "diversification, sectors, biggest contributor, or benchmark comparison.")

@@ -118,12 +118,39 @@ class ReturnContribution(BaseModel):
     portfolio_return: float
 
 
+class ExposureHolding(BaseModel):
+    symbol: str
+    value: float  # dollars of this slice that come from this holding
+
+
+class ExposureSlice(BaseModel):
+    id: str
+    label: str
+    weight: float  # share of the portfolio's ending value
+    value: float
+    holdings: list[ExposureHolding]
+    # Sectors only: this sector's share if the money in companies followed the reference market.
+    market_weight: float | None = None
+
+
+class Exposure(BaseModel):
+    by_type: list[ExposureSlice]
+    by_sector: list[ExposureSlice]  # company sectors, with funds split by their sector weights
+    outside_companies: list[ExposureSlice]  # bonds, gold & silver, crypto: no sector
+    company_weight: float
+    reference_name: str
+    as_of: date | None  # oldest fund sector breakdown used
+    source: str
+    message: str
+
+
 class MarketInsights(BaseModel):
     data_id: str
     correlation: CorrelationMatrix
     diversification: Diversification
     contributions: list[ReturnContribution]
     benchmark: BenchmarkComparison | None
+    exposure: Exposure | None = None
 
 
 # --- Portfolio chat ------------------------------------------------------------
