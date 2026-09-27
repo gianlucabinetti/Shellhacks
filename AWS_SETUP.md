@@ -47,12 +47,17 @@ The root `.env` loads automatically. Existing process environment variables
 take precedence. On an AWS machine, boto3 uses the attached IAM role if one
 is available and authorized. Run the check there first.
 
-On a laptop, use the event portal's temporary AWS CLI credentials if it
-provides them: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and
-`AWS_SESSION_TOKEN`. Put them in the ignored root `.env` or export them
-in your backend terminal. A configured AWS profile also works via
-`AWS_PROFILE`. Do not put credentials in React or any `VITE_*` variable.
-Do not reuse unrelated personal-account credentials for this event.
+On a laptop, the simplest option is a **Bedrock API key**: in the Bedrock
+console open **API keys**, create a long-term key, and set
+`AWS_BEARER_TOKEN_BEDROCK=` in the ignored root `.env`. Alternatively, use the
+event portal's temporary AWS CLI credentials if it provides them:
+`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN`. A
+configured AWS profile also works via `AWS_PROFILE`. Do not put credentials
+in React or any `VITE_*` variable. Do not reuse unrelated personal-account
+credentials for this event.
+
+Then set `AI_PROVIDER=bedrock` in `.env` (the example starts with `fallback`)
+and restart the backend.
 
 `check_bedrock` makes one real model call against a fictional portfolio and
 consumes a small amount of the event's usage allowance. It exits nonzero on
@@ -69,11 +74,10 @@ npm ci
 npm run dev
 ```
 
-Open the URL printed by Vite. The existing UI demo keeps `VITE_USE_MOCKS=true`.
-The ZIP's frontend and backend have different route/field contracts, and the
-frontend does not yet display AI explanations. Changing that flag to false
-alone will break its quiz/dashboard flow. Completing that adapter is separate
-from replacing the backend AI provider.
+Open the URL printed by Vite. With `AI_PROVIDER=bedrock`, the Markets screen's
+AI copilot, **Build it with AI**, and explanations use Amazon Nova; each AI
+answer is labelled as AWS output or an offline template, so a fallback is
+never mistaken for a model response.
 
 To demonstrate AWS explanations now, open the backend's `/docs` page, expand
 `POST /api/ai/explain`, click **Try it out**, and send:
@@ -109,15 +113,14 @@ explanations do not make those figures live market data.
 - **ValidationException / ResourceNotFound:** Check the region and model ID.
   Keep the in-region Nova Lite default for an event limited to us-east-1.
 - **Throttling / quota:** Retry later or ask the organizer about model quota.
-- **Frontend still shows fixture data:** Expected in this migration. The UI
-  still runs its existing mock demo; test AWS via `/docs` or the checker until
-  the team's frontend/backend adapter and AI panel are implemented.
+- **AI answers say "template":** the backend is using the offline fallback.
+  Check `AI_PROVIDER=bedrock` in `.env`, restart the backend, and run the
+  checker.
 - **App works but check fails:** Backend errors log an error code and use the
   built-in deterministic fallback. That fallback is not an AWS-generated
   explanation.
 - **No cloud access:** Set `AI_PROVIDER=fallback` in the root `.env` to
-  use the backend offline. The frontend remains on its separate mock demo via
-  `VITE_USE_MOCKS=true`.
+  use the backend offline. Market data and all calculations keep working.
 
 Example IAM permission for the default model:
 

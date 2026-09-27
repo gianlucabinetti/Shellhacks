@@ -87,8 +87,8 @@ dashboard were removed.
 
 ## Quick start
 
-Use Python 3.10+ and Node compatible with the existing Vite 8 project
-(Node 22.12+ is a suitable choice). Run backend commands from this directory.
+Use Python 3.10+ and Node 20.19+ or 22.12+ (required by Vite 8). Run backend
+commands from this directory.
 
 ### Backend — Linux / macOS / AWS editor
 
@@ -109,7 +109,10 @@ Copy-Item .env.example .env
 .\.venv\Scripts\python.exe -m uvicorn backend.main:app --reload --port 8000
 ```
 
-Copy the example only on first setup; preserve an existing `.env`.
+Copy the example only on first setup; preserve an existing `.env`. The example
+starts with `AI_PROVIDER=fallback` and no Alpaca keys, so crypto and offline AI
+work immediately; see [Enable stocks and ETFs](#enable-stocks-and-etfs) and
+[AWS configuration](#aws-configuration) to turn on the rest.
 
 ### Frontend — second terminal
 
@@ -118,6 +121,9 @@ cd frontend
 npm ci
 npm run dev
 ```
+
+`npm run dev` and `npm run demo` also work from the repo root, which forwards
+them to `frontend/`.
 
 Open the Vite URL. Bitcoin, Ethereum, and Solana are selected initially.
 Crypto prices work without Alpaca credentials. To run without AWS while trying
@@ -128,39 +134,43 @@ For remote AWS editor forwarding and CORS, see [AWS_SETUP.md](AWS_SETUP.md).
 ### Demo on phones
 
 A QR code made on `http://localhost:5173` can't work on a phone: `localhost`
-means "this device", so the phone looks for the app on itself. The laptop has
-to be reachable from the phone.
+means "this device", so the phone looks for the app on itself. The app needs a
+public address.
 
-**Campus, hackathon, or public Wi-Fi (recommended): use a tunnel.** These
-networks usually block devices from reaching each other, so the Wi-Fi option
-below will not work there. A Cloudflare quick tunnel gives a public `https`
-address that works on any network, including phone data. Install
+**One command, any network (recommended).** Install
 [`cloudflared`](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/)
-once (Windows: `winget install --id Cloudflare.cloudflared`), keep the backend
-and `npm run dev` running, then in another terminal:
+once (Windows: `winget install --id Cloudflare.cloudflared`, macOS:
+`brew install cloudflared`), then from the repo root or `frontend/`:
 
 ```bash
-cd frontend
-npm run tunnel
+npm run demo
 ```
 
-Open the `https://….trycloudflare.com` address it prints on the laptop and use
-**Share**; the QR code now points at that address. The address changes each
-time the tunnel restarts, and anyone with it can use the app while it runs
-(including AI features billed to your AWS account), so stop it (Ctrl+C) after
-the demo. The script forces `--protocol http2` because campus networks such as
-FIU's block the QUIC (UDP) connection `cloudflared` tries first; HTTP/2 uses
-ordinary HTTPS and gets through. Open a new terminal after installing so
-`cloudflared` is on the PATH.
+It starts the backend if it isn't running, builds the frontend, serves the
+build on port 4173, opens a Cloudflare quick tunnel, waits until the public
+`https://….trycloudflare.com` address answers, and opens it in your browser.
+Press **Share** there and the QR code works on any phone, on Wi-Fi or cellular.
+No need to run `npm run dev` for the demo.
 
-**Home Wi-Fi or a phone hotspot:** run `npm run dev:lan` instead, open the
+- **Keep the window open** during the demo. Ctrl+C stops sharing.
+- **The address changes every run**, so share QR codes after starting it.
+- **Anyone with the link can use the app** while it runs, including AI
+  features billed to your AWS account. Stop it after the demo.
+- **Why it's reliable on campus Wi-Fi:** it forces `--protocol http2`, because
+  networks such as FIU's block the QUIC (UDP) connection `cloudflared` tries
+  first. It serves the production build (a few files) rather than the dev
+  server (hundreds of modules), so pages load in about a second through the
+  tunnel. It finds `cloudflared` in its install folder, so it works even in a
+  terminal opened before installing.
+- **If the network blocks Cloudflare entirely**, connect the laptop to a phone
+  hotspot and run it again.
+
+**Same Wi-Fi or hotspot, no tunnel:** with the laptop and phone on the same
+home Wi-Fi or hotspot, run `npm run dev:lan` in `frontend/`, open the
 **Network** address Vite prints (for example `http://192.168.1.5:5173`), and
-share from there. Windows may ask to allow Node.js through the firewall; allow
-it on private networks only.
-
-Either way, phones load the app through the laptop and the Vite dev server
-forwards `/api` calls to the backend on port 8000, so no CORS or backend host
-changes are needed.
+share from there. Only devices on that network can open it, so it won't work
+for judges' phones. Windows may ask to allow Node.js through the firewall;
+allow it on private networks only. Campus Wi-Fi blocks this mode.
 
 ## Enable stocks and ETFs
 
@@ -189,9 +199,17 @@ AWS_REGION=us-east-1
 BEDROCK_MODEL_ID=amazon.nova-lite-v1:0
 ```
 
-The server uses boto3's credential chain: an authorized workshop IAM role,
-an AWS profile, or temporary credentials including a session token.
+The server uses boto3's credential chain. Any of these works:
+
+- **Bedrock API key:** create a long-term key in the Bedrock console
+  (API keys) and set `AWS_BEARER_TOKEN_BEDROCK=` in `.env`. This is the
+  simplest option on a laptop.
+- An authorized workshop IAM role (nothing to set).
+- An AWS CLI profile (`AWS_PROFILE`), or temporary credentials including a
+  session token.
+
 The root `.env` loads automatically, without overriding process variables.
+Never put AWS values in `VITE_*` variables; they would ship to the browser.
 
 No OpenAI key or package is used. The workshop code-editor password is not an
 AWS API key. Event EC2/SageMaker/S3 access does not itself establish Bedrock
@@ -203,7 +221,7 @@ python -m scripts.check_bedrock
 
 The checker makes one small real model request and never reports a template
 fallback as success. `AI_PROVIDER=fallback` selects offline explanations;
-an unset value also defaults to offline. AWS access remains unverified here.
+an unset value also defaults to offline.
 
 ## Data semantics
 
@@ -218,12 +236,17 @@ prices. Model failures may use a template, which the market screen labels.
 
 ## Verification
 
-- **90 backend tests passed:** existing routes, Bedrock, portfolio calculations,
-  crypto/equity calendars, pagination, cache expiry, missing prices, and API errors.
-- **Frontend production build and lint passed.**
-- **Live crypto requests verified:** all 12 catalog coins returned prices.
-  A 90-day BTC/ETH/SOL portfolio produced a complete series and calculation.
-- **Still needs credentials:** live stock/ETF access and live AWS generation.
+- **143 backend tests passed:** routes, Bedrock tool loops (stubbed),
+  portfolio, insight, and projection calculations, crypto/equity calendars,
+  pagination, cache expiry, missing prices, and API errors.
+- **Frontend type check, production build, and lint passed.**
+- **Live checks passed (Sept 27, 2026):** all 12 catalog coins returned
+  prices; Alpaca stocks (VTI, BND) through the IEX feed with paper keys; and
+  Amazon Nova Lite on Bedrock in us-east-1.
+- **Phone demo verified:** `npm run demo` went live on FIU campus Wi-Fi; the
+  public link, opened from the laptop at phone width, loaded in about half a
+  second, all market API calls succeeded, and the Share QR encoded the public
+  address.
 
 ```bash
 python -m pytest
@@ -244,6 +267,11 @@ Interactive docs: [localhost:8000/docs](http://localhost:8000/docs).
 | GET | `/api/market/assets` | Catalog and stock-credential configuration status. |
 | POST | `/api/market/portfolio` | Real-price, hypothetical portfolio calculation. |
 | POST | `/api/market/explain` | Explanation with AWS/template source and calculation ID. |
+| GET | `/api/market/ticker` | Live prices, day change, and 30-day sparklines. |
+| POST | `/api/market/insights` | Correlations, diversification score, contributions, benchmark. |
+| POST | `/api/market/chat` | AI copilot reply with what-if backtests. |
+| POST | `/api/market/build` | "Build it with AI" portfolio from a plain-language goal. |
+| POST | `/api/market/projection` | Future range percentile bands. |
 | GET | `/api/health` | Backend liveness. |
 | POST | `/api/risk/assess` | Deterministic risk scoring used by the Risk quiz. |
 | GET | `/api/portfolio/{profile}` | Legacy portfolio fixtures or external analytics hook. |
@@ -264,15 +292,27 @@ into its prompt.
 
 ## Code map
 
+Backend:
+
 - `backend/market_assets.json`: editable asset catalog.
 - `backend/services/market_data.py`: Alpaca reads, validation, and bounded cache.
 - `backend/services/market_portfolio.py`: actual portfolio calculations.
-- `backend/routers/market.py`: connected market and explanation endpoints.
-- `frontend/src/pages/MarketPage.tsx`: asset selection, charts, and explanations.
-- `frontend/src/pages/QuizPage.tsx`, `ResultPage.tsx`, `services/riskQuiz.ts`: the risk quiz and its backend scoring.
+- `backend/services/market_live.py`: live ticker.
+- `backend/services/market_insights.py`: benchmarks, what-if backtests, projection wiring.
+- `backend/analytics/insights.py`, `projection.py`: correlation, diversification, contributions, future range math.
+- `backend/ai/chat.py`, `builder.py`: copilot and "Build it with AI" prompts and Bedrock tool loops.
 - `backend/ai/provider.py`: Amazon Nova structured generation.
-- `scripts/check_market_data.py` and `scripts/check_bedrock.py`: live checks.
+- `backend/routers/market.py`: all market, insight, chat, build, and projection endpoints.
 - `backend/tests/`: backend/provider/analytics tests.
+- `scripts/check_market_data.py` and `scripts/check_bedrock.py`: live checks.
+
+Frontend:
+
+- `frontend/src/pages/MarketPage.tsx`: asset selection, dashboard, and charts.
+- `frontend/src/components/market/`: ticker, benchmark replay, X-ray, copilot, Build it with AI, share dialog, future range.
+- `frontend/src/pages/QuizPage.tsx`, `ResultPage.tsx`, `services/riskQuiz.ts`: the risk quiz and its backend scoring.
+- `frontend/src/utils/share.ts`: portfolio share links.
+- `frontend/scripts/demo.mjs`: `npm run demo` (build, serve, public tunnel).
 
 Plaid and Robinhood remain unconnected. Plaid Sandbox is an optional future
 account-linking demo with synthetic holdings; see the provider research.

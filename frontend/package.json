@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:lan": "vite --host",
-    "tunnel": "cloudflared tunnel --protocol http2 --url http://localhost:5173",
+    "demo": "node scripts/demo.mjs",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview"

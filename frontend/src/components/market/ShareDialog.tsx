@@ -64,8 +64,8 @@ export function ShareDialog({ portfolio, benchmark }: { portfolio: MarketPortfol
             <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
             <span>
               This QR points at <code>localhost</code>, which only exists on this computer, so phones can't open it.
-              Run <code>npm run tunnel</code> in <code>frontend/</code>, open the <strong>https://…trycloudflare.com</strong> address it
-              prints, and share from there. That works on any network, including campus Wi-Fi.
+              Run <code>npm run demo</code>: it opens a public <strong>https://…trycloudflare.com</strong> address in your
+              browser. Share from there and the QR works on any phone, on Wi-Fi or cellular.
             </span>
           </p>
         )}
