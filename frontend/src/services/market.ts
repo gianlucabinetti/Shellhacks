@@ -1,6 +1,6 @@
 import { request } from './http'
 import type {
-  BenchmarkId, ChatMessage, ChatResponse, MarketCatalog, MarketExplanation, MarketInsights, MarketPortfolio, MarketRequest,
+  BenchmarkId, ChatMessage, ChatResponse, MarketCatalog, MarketExplanation, MarketInsights, MarketPortfolio, MarketRequest, MarketTicker,
 } from '@/types/market'
 
 // These functions always call the backend, independent of the legacy mock demo.
@@ -13,3 +13,4 @@ export const getMarketInsights = (portfolio: MarketRequest, benchmark: Benchmark
   request<MarketInsights>('/api/market/insights', { method: 'POST', body: JSON.stringify({ portfolio, benchmark }) })
 export const askPortfolioChat = (portfolio: MarketRequest, benchmark: BenchmarkId | null, messages: ChatMessage[]) =>
   request<ChatResponse>('/api/market/chat', { method: 'POST', body: JSON.stringify({ portfolio, benchmark, messages }) })
+export const getMarketTicker = () => request<MarketTicker>('/api/market/ticker')

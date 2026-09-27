@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import { ArrowDown, ArrowUp, Bot, CornerDownLeft, FlaskConical, Send, Sparkles, X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -75,14 +76,15 @@ function WhatIfCard({ result, portfolio, diversification, onLoad }: {
     { label: 'Diversification', value: `${result.diversification_score}/100`, delta: diversification == null ? null : <Delta now={result.diversification_score} was={diversification} format={v => `${v.toFixed(0)}`} /> },
   ]
   return (
-    <div className="mt-3 overflow-hidden rounded-sm border border-primary/30 bg-background/60">
+    <motion.div className="mt-3 overflow-hidden rounded-xl border border-primary/30 bg-black/30"
+      initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, type: 'spring', stiffness: 300, damping: 28 }}>
       <div className="flex items-center gap-2 border-b border-primary/20 bg-primary/[0.07] px-3 py-2 text-xs">
         <FlaskConical className="size-3.5 text-primary" aria-hidden />
         <span className="font-semibold uppercase tracking-wide text-primary">What-if · recalculated with real prices</span>
       </div>
       <div className="flex flex-wrap gap-1.5 px-3 pt-3">
         {result.holdings.map(h => (
-          <span key={h.symbol} className="rounded-sm bg-secondary px-2 py-0.5 font-market-data text-[0.7rem]">
+          <span key={h.symbol} className="rounded-full bg-white/[0.07] px-2 py-0.5 font-market-data text-[0.7rem]">
             {short(h.symbol)} {Math.round(h.weight * 100)}%
           </span>
         ))}
@@ -97,9 +99,9 @@ function WhatIfCard({ result, portfolio, diversification, onLoad }: {
       </dl>
       <div className="flex items-center justify-between gap-2 border-t px-3 py-2">
         <span className="text-xs text-muted-foreground">Would end at {formatCurrency(result.final_value, 'USD', 2)}</span>
-        <Button size="sm" variant="secondary" onClick={onLoad}>Load this mix</Button>
+        <Button size="sm" variant="gradient" onClick={onLoad}>Load this mix</Button>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -178,17 +180,20 @@ export function PortfolioCopilot({ open, onClose, portfolio, benchmark, question
   }, [question])
 
   return (
-    <>
-      {open && <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={onClose} aria-hidden />}
-      <aside
-        aria-label="AI portfolio copilot" aria-hidden={!open} inert={!open}
-        className={cn(
-          'fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l bg-card shadow-2xl shadow-black/50 sm:w-[430px]',
-          open ? 'drawer-in' : 'hidden',
-        )}
+    <AnimatePresence>
+      {open && (
+        <motion.div key="scrim" className="fixed inset-0 z-40 bg-black/50 backdrop-blur-[2px] lg:hidden" onClick={onClose} aria-hidden
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
+      )}
+      {open && (
+      <motion.aside
+        key="drawer" aria-label="AI portfolio copilot"
+        initial={{ x: '100%', opacity: 0.6 }} animate={{ x: 0, opacity: 1 }} exit={{ x: '100%', opacity: 0.6 }}
+        transition={{ type: 'spring', stiffness: 320, damping: 34 }}
+        className="glass fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-white/[0.08] shadow-2xl shadow-black/60 sm:w-[440px]"
       >
-        <header className="flex items-center gap-3 border-b px-4 py-3">
-          <span className="grid size-9 place-items-center rounded-sm bg-primary/15 text-primary"><Bot className="size-5" aria-hidden /></span>
+        <header className="flex items-center gap-3 border-b border-white/[0.06] px-4 py-3.5">
+          <span className="bg-gradient-ai grid size-9 place-items-center rounded-xl text-[#07080a] shadow-lg shadow-[#7cb4ff]/20"><Bot className="size-5" aria-hidden /></span>
           <div className="min-w-0 flex-1">
             <p className="font-semibold leading-tight">Portfolio copilot</p>
             <p className="truncate text-xs text-muted-foreground">Answers from your calculated results · Amazon Bedrock</p>
@@ -199,22 +204,24 @@ export function PortfolioCopilot({ open, onClose, portfolio, benchmark, question
         <div className="flex-1 overflow-y-auto px-4 py-4 scrollbar-thin" aria-live="polite">
           {messages.length === 0 && (
             <div className="flex flex-col gap-4">
-              <div className="rounded-sm border bg-background/50 p-4 text-sm leading-6">
+              <div className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4 text-sm leading-6">
                 <p className="font-medium">Ask anything about this portfolio.</p>
                 <p className="mt-1 text-muted-foreground">
                   I explain the numbers on this page and can test <span className="text-foreground">what-if</span> mixes
                   against the same real price history. I can't predict the future or tell you what to buy.
                 </p>
               </div>
-              <Button onClick={() => { void overview() }} className="self-start"><Sparkles /> Give me the 30-second overview</Button>
+              <Button variant="gradient" onClick={() => { void overview() }} className="self-start"><Sparkles /> Give me the 30-second overview</Button>
             </div>
           )}
           <ol className="flex flex-col gap-4">
             {messages.map((m, i) => (
-              <li key={i} className={cn('flex flex-col', m.role === 'user' ? 'items-end' : 'items-start')}>
+              <motion.li key={i} className={cn('flex flex-col', m.role === 'user' ? 'items-end' : 'items-start')}
+                initial={{ opacity: 0, y: 10, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ type: 'spring', stiffness: 380, damping: 30 }}>
                 <div className={cn(
-                  'max-w-[92%] rounded-md px-3.5 py-2.5 text-sm leading-6',
-                  m.role === 'user' ? 'bg-primary text-primary-foreground' : m.error ? 'border border-destructive/40 bg-destructive/10' : 'border bg-background/60',
+                  'max-w-[92%] rounded-2xl px-4 py-2.5 text-sm leading-6',
+                  m.role === 'user' ? 'rounded-br-md bg-primary text-primary-foreground' : m.error ? 'rounded-bl-md border border-destructive/40 bg-destructive/10' : 'rounded-bl-md border border-white/[0.07] bg-white/[0.04]',
                 )}>
                   {m.role === 'assistant' ? <RichText text={m.content} /> : m.content}
                   {m.whatIfs?.map((w, j) => (
@@ -227,7 +234,7 @@ export function PortfolioCopilot({ open, onClose, portfolio, benchmark, question
                     {m.source === 'bedrock' ? 'AI · Amazon Bedrock' : 'Offline answer · AI unavailable'}
                   </span>
                 )}
-              </li>
+              </motion.li>
             ))}
             {busy && (
               <li className="flex items-center gap-1 px-1" aria-label="Copilot is thinking">
@@ -238,11 +245,11 @@ export function PortfolioCopilot({ open, onClose, portfolio, benchmark, question
           <div ref={endRef} />
         </div>
 
-        <div className="border-t p-3">
+        <div className="border-t border-white/[0.06] p-3">
           <div className="mb-2 flex gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
             {chips.map(s => (
               <button key={s} type="button" disabled={busy} onClick={() => { void send(s) }}
-                className="shrink-0 rounded-full border px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground disabled:opacity-50">
+                className="shrink-0 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground disabled:opacity-50">
                 {s}
               </button>
             ))}
@@ -254,7 +261,7 @@ export function PortfolioCopilot({ open, onClose, portfolio, benchmark, question
               onChange={e => setDraft(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void send(draft) } }}
               placeholder="e.g. What if I swapped SOL for bonds?"
-              className="max-h-32 min-h-10 flex-1 resize-none rounded-sm border bg-background px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-primary"
+              className="max-h-32 min-h-10 flex-1 resize-none rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-primary"
             />
             <Button type="submit" size="icon" disabled={busy || !draft.trim()} aria-label="Send question"><Send /></Button>
           </form>
@@ -262,7 +269,8 @@ export function PortfolioCopilot({ open, onClose, portfolio, benchmark, question
             <CornerDownLeft className="size-3" aria-hidden /> Enter to send · Educational only, not financial advice
           </p>
         </div>
-      </aside>
-    </>
+      </motion.aside>
+      )}
+    </AnimatePresence>
   )
 }
