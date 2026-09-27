@@ -1,0 +1,9 @@
+{
+  "name": "portfolio-x-ray",
+  "private": true,
+  "description": "Shortcuts so npm commands also work from the repo root. The app lives in frontend/ and backend/.",
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "demo": "npm --prefix frontend run demo"
+  }
+}

@@ -130,9 +130,10 @@ calculation even if a refresh changes the data.
 
 ## Original demo and AWS
 
-The original questionnaire remains accessible through **Original demo** and
-still uses its existing fixtures. `VITE_USE_MOCKS=true` controls that legacy flow
-only; it does not disable the new market screen's backend requests.
+The original questionnaire is now the **Risk quiz** screen. It is scored by the
+backend (`POST /api/risk/assess`) and hands its result to the market screen as
+real funds. The frontend no longer has a mock mode (`VITE_USE_MOCKS` was
+removed).
 
 `USE_MOCK_ANALYTICS` also controls only the legacy portfolio routes. Leave it
 true unless the team's separate `analytics.engine` exists. The new market

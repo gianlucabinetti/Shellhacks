@@ -12,9 +12,9 @@ export default defineConfig({
     },
   },
   server: {
-    // Phones reach the app through the laptop (npm run dev:lan on home Wi-Fi, or
-    // npm run tunnel on campus/public Wi-Fi). API calls go through this dev server
-    // to the backend, so no CORS changes are needed.
+    // Phones reach the app through the laptop (npm run demo on any network, or
+    // npm run dev:lan on home Wi-Fi). API calls go through this server to the
+    // backend, so no CORS changes are needed. `vite preview` reuses both settings.
     proxy: { '/api': 'http://localhost:8000' },
     // Vite rejects unknown hostnames; allow Cloudflare quick-tunnel addresses.
     allowedHosts: ['.trycloudflare.com'],
