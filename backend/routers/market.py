@@ -9,11 +9,15 @@ from typing import Literal
 
 from backend.ai.models import Allocation, PortfolioAnalytics, PortfolioExplanation
 from backend.ai.explanations import create_fallback_explanation
+from backend.ai.chat import BedrockPortfolioChat, build_facts, fallback_reply, suggestions
 from backend.ai.provider import BedrockExplanationProvider, error_code
-from backend.models.market import MarketPortfolio, MarketRequest
+from backend.models.market import (
+    ChatRequest, ChatResponse, InsightsRequest, MarketInsights, MarketPortfolio, MarketRequest,
+)
 from backend.services import ai_client
 from backend.services.market_data import assets, stock_credentials_configured, MarketDataError
-from backend.services.market_portfolio import analyze_market_portfolio
+from backend.services.market_insights import build_insights, insights_for, run_what_if
+from backend.services.market_portfolio import analyze_market_portfolio, load_market_portfolio
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -81,3 +85,34 @@ def explain(request: MarketRequest):
     return MarketExplanation(
         data_id=portfolio.data_id, source="fallback", explanation=create_fallback_explanation(analytics)
     )
+
+
+@router.post("/insights", response_model=MarketInsights)
+def insights(request: InsightsRequest):
+    try:
+        return build_insights(request.portfolio, request.benchmark)
+    except MarketDataError as error:
+        return _market_error(error)
+
+
+@router.post("/chat", response_model=ChatResponse)
+def chat(request: ChatRequest):
+    try:
+        portfolio, history = load_market_portfolio(request.portfolio)
+        facts = build_facts(portfolio, insights_for(portfolio, history, request.benchmark), history)
+    except MarketDataError as error:
+        return _market_error(error)
+    hints = suggestions(facts)
+    try:
+        provider = ai_client._get_provider()
+        if isinstance(provider, BedrockExplanationProvider):
+            reply, what_ifs = BedrockPortfolioChat(provider.client, provider.model).reply(
+                request.messages, facts, [a.symbol for a in assets()],
+                lambda holdings: run_what_if(request.portfolio, holdings),
+            )
+            return ChatResponse(data_id=portfolio.data_id, source="bedrock", reply=reply,
+                                what_ifs=what_ifs, suggestions=hints)
+    except (BotoCoreError, ClientError, ValueError, KeyError, TypeError) as error:
+        logger.warning("Portfolio chat used fallback (%s).", error_code(error))
+    return ChatResponse(data_id=portfolio.data_id, source="fallback",
+                        reply=fallback_reply(request.messages[-1].content, facts), suggestions=hints)

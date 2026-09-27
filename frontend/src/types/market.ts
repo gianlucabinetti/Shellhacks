@@ -56,3 +56,49 @@ export interface MarketExplanation {
     disclaimer: string
   }
 }
+
+export type BenchmarkId = 'SPY' | '60_40' | 'BTC'
+export interface CorrelationPair { a: string; b: string; correlation: number }
+export interface MarketInsights {
+  data_id: string
+  correlation: { symbols: string[]; matrix: (number | null)[][]; observations: number }
+  diversification: {
+    score: number
+    label: string
+    effective_bets: number
+    diversification_ratio: number
+    average_correlation: number | null
+    observations: number
+    most_correlated: CorrelationPair | null
+    least_correlated: CorrelationPair | null
+    message: string
+  }
+  contributions: { symbol: string; dollars: number; portfolio_return: number }[]
+  benchmark: {
+    id: BenchmarkId
+    name: string
+    available: boolean
+    message: string | null
+    performance: { date: string; value: number }[]
+    total_return: number | null
+    annualized_volatility: number | null
+    max_drawdown: number | null
+    excess_return: number | null
+  } | null
+}
+export interface ChatMessage { role: 'user' | 'assistant'; content: string }
+export interface WhatIfResult {
+  holdings: { symbol: string; weight: number }[]
+  total_return: number
+  annualized_volatility: number
+  max_drawdown: number
+  final_value: number
+  diversification_score: number
+}
+export interface ChatResponse {
+  data_id: string
+  source: 'bedrock' | 'fallback'
+  reply: string
+  what_ifs: WhatIfResult[]
+  suggestions: string[]
+}

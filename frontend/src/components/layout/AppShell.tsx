@@ -10,6 +10,8 @@ interface AppShellProps {
   onStartAssessment: () => void
   marketsActive: boolean
   landingActive: boolean
+  /** Wider content area for dense dashboard screens. */
+  wide?: boolean
   children: React.ReactNode
 }
 
@@ -20,7 +22,7 @@ const MARKET_TICKER = [
   { symbol: 'BTC', value: '$68,420', change: '+1.4%', positive: true },
 ]
 
-export function AppShell({ onHome, onMarkets, onStartAssessment, marketsActive, landingActive, children }: AppShellProps) {
+export function AppShell({ onHome, onMarkets, onStartAssessment, marketsActive, landingActive, wide = false, children }: AppShellProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const closeMenu = () => setMenuOpen(false)
 
@@ -95,7 +97,7 @@ export function AppShell({ onHome, onMarkets, onStartAssessment, marketsActive, 
           </div>
         </div>
       </section>
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-10 lg:px-8">{children}</main>
+      <main className={`mx-auto w-full flex-1 px-4 py-6 sm:px-6 sm:py-10 lg:px-8 ${wide ? 'max-w-[1400px]' : 'max-w-6xl'}`}>{children}</main>
       <footer className="border-t border-white/10 bg-[#0b0d0e]">
         <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 lg:px-8">
           <Disclaimer />
