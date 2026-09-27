@@ -1,9 +1,8 @@
 /**
  * API response/request shapes.
  *
- * Documented in docs/api-contracts.md (v0.1 draft, not yet agreed with backend,
- * analytics or AI). Keep this file, src/mocks/ and that doc in sync; components only
- * depend on these types, not on where the data comes from.
+ * Shared risk-quiz and error types. The quiz is scored by the backend
+ * (POST /api/risk/assess) through services/riskQuiz.ts.
  *
  * Conventions: camelCase fields, weights/returns as decimals (0.6 = 60%),
  * dates as ISO 8601 strings, money as plain numbers in `currency`.

@@ -136,58 +136,12 @@
   animation-play-state: paused;
 }
 
-.market-grid {
-  background-image: linear-gradient(#ffffff0a 1px, transparent 1px), linear-gradient(90deg, #ffffff0a 1px, transparent 1px);
-  background-size: 64px 64px;
-}
-
-.welcome-bleed {
-  position: relative;
-  left: 50%;
-  width: 100vw;
-  margin-left: -50vw;
-}
-
-.market-line {
-  stroke-dasharray: 1200;
-  stroke-dashoffset: 1200;
-  animation: draw-line 3.2s ease-out forwards;
-}
-
-.market-feature-grid {
-  background-image: linear-gradient(#10121414 1px, transparent 1px), linear-gradient(90deg, #10121414 1px, transparent 1px);
-  background-size: 42px 42px;
-}
-
-.hero-background-player {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.enter-up {
-  animation: enter-up 650ms both;
-}
-
-.enter-up-delay {
-  animation: enter-up 750ms 120ms both;
-}
-
 .font-editorial {
   font-weight: 600;
 }
 
 @keyframes ticker-scroll {
   to { transform: translateX(-50%); }
-}
-
-@keyframes draw-line {
-  to { stroke-dashoffset: 0; }
-}
-
-@keyframes enter-up {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 @media (prefers-reduced-motion: reduce) {
