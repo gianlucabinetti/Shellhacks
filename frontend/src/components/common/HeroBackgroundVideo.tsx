@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
+
+const HtmlPlayer = lazy(() => import('react-player/HtmlPlayer'))
 
 const VIDEO_PATH = '/videos/market-hero.mp4'
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
@@ -35,17 +37,21 @@ export function HeroBackgroundVideo() {
       </svg>
 
       {!prefersReducedMotion && !videoFailed && (
-        <video
-          className="absolute inset-0 size-full object-cover opacity-55"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          onError={() => setVideoFailed(true)}
-        >
-          <source src={VIDEO_PATH} type="video/mp4" />
-        </video>
+        <Suspense fallback={null}>
+          <HtmlPlayer
+            className="hero-background-player absolute inset-0 opacity-55"
+            src={VIDEO_PATH}
+            autoPlay
+            muted
+            loop
+            playsInline
+            controls={false}
+            width="100%"
+            height="100%"
+            style={{ position: 'absolute', inset: 0 }}
+            onError={() => setVideoFailed(true)}
+          />
+        </Suspense>
       )}
 
       <div className="absolute inset-0 bg-[#080b0d]/55" />
